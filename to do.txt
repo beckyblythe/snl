@@ -1,0 +1,13 @@
+-to figure out how to save simulations
+-to figure out how to save plots
+-to store simulations results in a separate folder
+-------------------------------------------------------------
+
+-to save only spike times and minimal voltage for each interval + save plots of phase plane  and voltage trace in separate folders
+
+-check if threshold is ok for different parameters
+-to check axis, labels etc.
+
+
+-to make it possible to save all images together at once (for now it's ok to save only histograms)
+
