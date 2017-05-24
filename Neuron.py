@@ -2,6 +2,7 @@ from brian2 import *
 import numpy as np
 import pickle
 
+
 class Object(object):
     pass
 
@@ -22,7 +23,7 @@ tau=1*ms
 Cm = 1.65*uF # /cm**2
 Iapp = .158*uA
 I_noise = .07*uA
-duration = 2000*ms
+duration = 10000*ms
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -74,20 +75,49 @@ def find_points(Cm=Cm, Iapp=Iapp):
     Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 2, v0=[-100, 0]*mV, n0=[.1,.1], duration=1000*ms, I_noise=0*uA)
     node = max(V[0])
     cycle_boundary= min (V[1])
+      
     return node, cycle_boundary
     
-def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=duration, I_noise=I_noise):
-    '''simulates neuron and plots all the available plots'''
-    node, cycle_boundary = find_points(Cm=Cm, Iapp=Iapp)
-    #setting threshold in the middle between the node and the limit cycle
-    thresh = .5*(node+cycle_boundary)
+def get_points(file_name):
+    #read from file
+    with open('points/'+file_name, 'rb') as f:
+        data_loaded = pickle.load(f)
+    node = data_loaded['node']
+    cycle_boundary = data_loaded['cycle_boundary']
     
-    file_name=str(Cm)+' '+str(Iapp)+' '+str(v0)+' '+str(n0)+' '+str(duration/second)+' s '+str(I_noise)
+    return node, cycle_boundary
+
+def set_thresh(Cm, Iapp, weight=.5):
+    file_name = str(Cm)+'  '+str(Iapp)
+    
+    try:
+        node, cycle_boundary = get_points(file_name)
+        print('Reading node and cycle boundary location from file.')
+    except IOError:
+        node, cycle_boundary = find_points(Cm=Cm, Iapp=Iapp)
+    #setting threshold in the middle between the node and the limit cycle
+        data_generated = {'node':node,'cycle_boundary':cycle_boundary}
+        with open('points/'+file_name, 'wb') as f:
+            pickle.dump(data_generated, f) 
+        
+    thresh = weight*node+(1-weight)*cycle_boundary
+
+    return thresh, node, cycle_boundary
+        
+    
+def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=duration, I_noise=I_noise, weight=.5):
+    '''simulates neuron and plots all the available plots'''
+    
+    thresh,node,cycle_boundary = set_thresh(Cm, Iapp, weight)
+    
+    file_name=str(Cm)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise)
       
     try:     
         Spikes, Min_Volt = get_simulation(file_name)
-        print('Other plots are already generated')
+        print('Other plots are already generated. Find them in traces folder.')
         plot_histograms(Spikes, Min_Volt, thresh)
+        plt.savefig('histograms/'+file_name+'  '+str(weight)+'.png')
+        plt.show()
         
     except IOError:
         Spikes, t, V, n= simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
@@ -97,7 +127,7 @@ def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=dura
         plt.savefig('traces/'+file_name+'.png') 
         plt.show()
         plot_histograms(Spikes,Min_Volt,thresh) 
-        plt.savefig('histograms/'+file_name+str(thresh)+'.png')
+        plt.savefig('histograms/'+file_name+'  '+str(weight)+'.png')
         plt.show()
         
         data_generated =  {'Spikes':Spikes,'Min_Volt':Min_Volt}
@@ -112,6 +142,7 @@ def plot_traces(t,V,n,node=0, cycle_boundary=0):
     plt.xlabel('time (s)')
     plt.ylabel('voltage (mV)')
     plt.plot(t, V.T) 
+    plt.axhline(y=node, linestyle = ':',color = 'm')
     plt.subplot2grid((2,2),(1,0))
     plt.title('Trajectory in V-n plane')
     plt.xlabel('voltage (mV)')
@@ -122,8 +153,8 @@ def plot_traces(t,V,n,node=0, cycle_boundary=0):
     plt.xlabel('voltage (mV)')
     plt.ylabel('n')
     plt.plot(V.T,n.T)
-    plt.axvline(x=node, linestyle = ':')
-    plt.axvline(x=cycle_boundary,linestyle = ':')
+    plt.axvline(x=node, linestyle = ':', color='m')
+    plt.axvline(x=cycle_boundary,linestyle = ':', color='c')
     plt.xlim((node-3*(cycle_boundary-node),cycle_boundary+3*(cycle_boundary-node)))
     plt.ylim((-.1,.5))
     
@@ -174,7 +205,7 @@ def plot_histograms(Spikes, Min_Volt, thresh =-59.5):
     plt.hist(ISI_burst)
     
 
-plot_everything()
+plot_everything(weight = 0)
 
         
 
