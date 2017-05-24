@@ -22,7 +22,7 @@ tau=1*ms
 Cm = 1.65*uF # /cm**2
 Iapp = .158*uA
 I_noise = .07*uA
-duration = 2000*ms
+duration = 500000*ms
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -57,6 +57,7 @@ def get_simulation(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=durat
         with open('simulations/'+file_name, 'wb') as f:
             pickle.dump(data_generated, f)
             
+                
     return M, Mv, Mn
         
 
@@ -132,15 +133,21 @@ def plot_trajectories(Mv,Mn,node=0, cycle_boundary=0, xlim=(-65,-50)):
     plt.ylim((-0.1,1))
     plt.show()
 
+def find_period_minima(timecourse, section_indices):
+    minima = np.empty(section_indices.shape[0]-1)
+    for i in range(section_indices.shape[0]-1):
+        minima[i] = np.min(timecourse[section_indices[i]:section_indices[i+1]])
+    return minima
+        
+    
 def classify_ISI_indices(M,Mv, thresh =-59.5):
     '''returns tuple: indices of spikes after which there is a quiet interval,
                       indices of spikes after which there is a burst interval '''
-    #find indices where V<threshold between the first and the last spike observed                  
-    below_thresh=np.where((Mv.v[0] < thresh) & (Mv.t <= M.t[-1]) & (Mv.t >= M.t[0]))
-    #find indices of spikes after which the voltage goes below threshold
-    indices_quiet = np.unique(np.searchsorted(M.t,np.array(Mv.t)[below_thresh]))-1
-    #find indices of spikes after which the voltage doesn't go below threshold                                          
-    indices_burst = np.delete(np.arange(len(M.t)-1), indices_quiet)
+    
+    spike_indices = np.where(np.in1d(Mv.t, M.t))[0]
+    voltage_minima = find_period_minima(Mv.v.flatten(),spike_indices)
+    indices_quiet = np.where(voltage_minima < thresh)
+    indices_burst = np.where(voltage_minima >= thresh)
     return indices_quiet, indices_burst
 
 def calculate_ISI(M):
