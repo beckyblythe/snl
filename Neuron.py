@@ -9,34 +9,7 @@ class Object(object):
 
 plt.rcParams['figure.figsize'] = 12, 4
 
-defaultclock.dt = 0.05*ms
 
-
-gL = 0.1*msiemens
-EL = -65*mV
-ENa = 55*mV
-EK = -90*mV
-gNa = 35*msiemens
-gK = 9*msiemens
-tau=1*ms
-
-Cm = 1.65*uF # /cm**2
-Iapp = .158*uA
-I_noise = .07*uA
-duration = 10000*ms
-
-eqs = '''
-dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
-m = alpha_m/(alpha_m+beta_m) : 1
-alpha_m = -0.1/mV*(v+35*mV)/(exp(-0.1/mV*(v+35*mV))-1)/ms : Hz
-beta_m = 4*exp(-(v+60*mV)/(18*mV))/ms : Hz
-dh/dt = 5*(alpha_h*(1-h)-beta_h*h) : 1
-alpha_h = 0.07*exp(-(v+58*mV)/(20*mV))/ms : Hz
-beta_h = 1./(exp(-0.1/mV*(v+28*mV))+1)/ms : Hz
-dn/dt = 5*(alpha_n*(1-n)-beta_n*n) : 1
-alpha_n = -0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz
-beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
-'''
 
 def get_simulation(file_name):
     '''reads simulation results from file or runs simulation'''
@@ -69,13 +42,21 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(Cm=Cm, Iapp=Iapp):
+def find_points(Cm, Iapp, v0=[-70,-65,-60.5,-59.5,-55,-50]*mV,n0=[.3,.3,.3, 0,0,0]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 2, v0=[-100, 0]*mV, n0=[.1,.1], duration=1000*ms, I_noise=0*uA)
+    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=2000*ms, I_noise=0*uA)
     node = max(V[0])
-    cycle_boundary= min (V[1])
-      
+    cycle_boundary= min (V[-1])
+    
+    file_name = str(Cm)+'  '+str(Iapp)
+    
+    plot_traces(t,V,n, node, cycle_boundary)
+    plt.savefig('points/'+file_name+'.png') 
+    plt.show()
+    
+    if node >= cycle_boundary:
+        raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
     return node, cycle_boundary
     
 def get_points(file_name):
@@ -105,7 +86,7 @@ def set_thresh(Cm, Iapp, weight=.5):
     return thresh, node, cycle_boundary
         
     
-def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=duration, I_noise=I_noise, weight=.5):
+def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n0=0):
     '''simulates neuron and plots all the available plots'''
     
     thresh,node,cycle_boundary = set_thresh(Cm, Iapp, weight)
@@ -121,11 +102,12 @@ def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=dura
         
     except IOError:
         Spikes, t, V, n= simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
-        Min_Volt= find_period_minima(V.flatten(),t, Spikes)
+        
                 
         plot_traces(t,V,n,node, cycle_boundary)
         plt.savefig('traces/'+file_name+'.png') 
         plt.show()
+        Min_Volt= find_period_minima(V.flatten(),t, Spikes)
         plot_histograms(Spikes,Min_Volt,thresh) 
         plt.savefig('histograms/'+file_name+'  '+str(weight)+'.png')
         plt.show()
@@ -134,7 +116,7 @@ def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=dura
         with open('simulations/'+file_name, 'wb') as f:
             pickle.dump(data_generated, f)        
   
-def plot_traces(t,V,n,node=0, cycle_boundary=0):
+def plot_traces(t,V,n,node, cycle_boundary):
     '''plots voltage against time'''   
     plt.figure(figsize=(12, 8))
     plt.subplot2grid((2,2),(0,0), colspan=2)
@@ -155,19 +137,21 @@ def plot_traces(t,V,n,node=0, cycle_boundary=0):
     plt.plot(V.T,n.T)
     plt.axvline(x=node, linestyle = ':', color='m')
     plt.axvline(x=cycle_boundary,linestyle = ':', color='c')
-    plt.xlim((node-3*(cycle_boundary-node),cycle_boundary+3*(cycle_boundary-node)))
+    plt.xlim((min(node-2*(cycle_boundary-node),cycle_boundary+2*(cycle_boundary-node)), 
+              max(node-2*(cycle_boundary-node),cycle_boundary+2*(cycle_boundary-node))))
     plt.ylim((-.1,.5))
     
             
 def find_period_minima(timecourse, time, section_array):
     print()
     section_indices = np.where(np.in1d(time, section_array))[0]
+    print(section_indices.shape[0])
     minima = np.empty(section_indices.shape[0]-1)
     for i in range(section_indices.shape[0]-1):
         minima[i] = np.min(timecourse[section_indices[i]:section_indices[i+1]])
     return minima        
     
-def classify_ISI_indices(Min_Volt, thresh =-59.5):
+def classify_ISI_indices(Min_Volt, thresh):
     '''returns tuple: indices of spikes after which there is a quiet interval,
                       indices of spikes after which there is a burst interval '''
     indices_quiet = np.where(Min_Volt < thresh)
@@ -178,7 +162,7 @@ def calculate_ISI(Spikes):
     '''calculates all ISIs lengths'''
     return np.diff(Spikes)
     
-def classify_ISI_lengths(Spikes, Min_Volt, thresh =-59.5):
+def classify_ISI_lengths(Spikes, Min_Volt, thresh):
     '''calculates ISI lengths and classifies them into quiet and burst'''
     indices_quiet, indices_burst = classify_ISI_indices(Min_Volt, thresh)
     ISI = calculate_ISI(Spikes)
@@ -186,7 +170,7 @@ def classify_ISI_lengths(Spikes, Min_Volt, thresh =-59.5):
     ISI_burst = ISI[indices_burst]
     return ISI, ISI_quiet, ISI_burst
     
-def plot_histograms(Spikes, Min_Volt, thresh =-59.5):
+def plot_histograms(Spikes, Min_Volt, thresh):
     '''plots histogram for ISIs and classified ISIs'''
     ISI, ISI_quiet, ISI_burst = classify_ISI_lengths(Spikes, Min_Volt, thresh)
         
@@ -194,6 +178,7 @@ def plot_histograms(Spikes, Min_Volt, thresh =-59.5):
     plt.subplot(1,3,1)
     plt.title('All '+ str(ISI.shape[0]) + ' ISIs. ')
     plt.xlabel('ISI (s)')
+    plt.ylabel('# ISIs')
     plt.hist(ISI)
     plt.subplot(1,3,2)
     plt.title(str(ISI_quiet.shape[0]) + ' Quiet ISIs')
@@ -204,8 +189,39 @@ def plot_histograms(Spikes, Min_Volt, thresh =-59.5):
     plt.xlabel('ISI (s)')
     plt.hist(ISI_burst)
     
+    
+defaultclock.dt = 0.05*ms
 
-plot_everything(weight = 0)
+
+gL = 0.1*msiemens
+EL = -65*mV
+ENa = 55*mV
+EK = -90*mV
+gNa = 35*msiemens
+gK = 9*msiemens
+tau=1*ms
+
+Cm = 1.8*uF # /cm**2
+Iapp = .15*uA
+I_noise = .08*uA
+duration = 10000*ms
+
+weight=.5
+
+eqs = '''
+dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
+m = alpha_m/(alpha_m+beta_m) : 1
+alpha_m = -0.1/mV*(v+35*mV)/(exp(-0.1/mV*(v+35*mV))-1)/ms : Hz
+beta_m = 4*exp(-(v+60*mV)/(18*mV))/ms : Hz
+dh/dt = 5*(alpha_h*(1-h)-beta_h*h) : 1
+alpha_h = 0.07*exp(-(v+58*mV)/(20*mV))/ms : Hz
+beta_h = 1./(exp(-0.1/mV*(v+28*mV))+1)/ms : Hz
+dn/dt = 5*(alpha_n*(1-n)-beta_n*n) : 1
+alpha_n = -0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz
+beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
+'''
+
+plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
         
 
