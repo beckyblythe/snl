@@ -22,7 +22,7 @@ tau=1*ms
 Cm = 1.65*uF # /cm**2
 Iapp = .158*uA
 I_noise = .07*uA
-duration = 500000*ms
+duration = 1000*ms
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -42,23 +42,23 @@ def get_simulation(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=durat
     #file name includes all altering parameters
     file_name=str(Cm)+' '+str(Iapp)+' '+str(v0)+' '+str(n0)+' '+str(duration/second)+' s '+str(I_noise)
     #read from file if it exists
-    try:
-        with open('simulations/'+file_name, 'rb') as f:
-            data_loaded = pickle.load(f)
-            
-        M=data_loaded['M']
-        Mv=data_loaded['Mv']
-        Mn=data_loaded['Mn']
-    
-    #run simulation if file doesn't exist and save results in the new file
-    except IOError:
-        M, Mv, Mn = simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
-        data_generated =  {'M':M,'Mv':Mv,'Mn':Mn}
-        with open('simulations/'+file_name, 'wb') as f:
-            pickle.dump(data_generated, f)
-            
+
+    with open('simulations/'+file_name, 'rb') as f:
+        data_loaded = pickle.load(f)
+        
+    Spikes=data_loaded['Spikes']
+    Min_Volt=data_loaded['Min_Volt']
+        
+#    
+#    #run simulation if file doesn't exist and save results in the new file
+#    except IOError:
+#        M, Mv, Mn = simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
+#        data_generated =  {'M':M,'Mv':Mv,'Mn':Mn}
+#        with open('simulations/'+file_name, 'wb') as f:
+#            pickle.dump(data_generated, f)
+#            
                 
-    return M, Mv, Mn
+    return Spikes, Min_Volt
         
 
 def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
@@ -74,26 +74,25 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
     
     run(duration, report='text')
     
-    #transform results (otherwise pickle doen't work)
-    M=Object()
-    Mv=Object()
-    Mn=Object()
+#    #transform results (otherwise pickle doen't work)
+#    M=Object()
+#    Mv=Object()
+#    Mn=Object()
     
-    M.t = np.array(M_temp.t)
-    Mv.t = np.array(Mv_temp.t)
-    Mv.v = np.array(Mv_temp.v)*1000 #-----> mV
-    Mn.t = np.array(Mn_temp.t)
-    Mn.n = np.array(Mn_temp.n)
+    Spikes = np.array(M_temp.t)
+    t = np.array(Mv_temp.t)
+    V = np.array(Mv_temp.v)*1000 #-----> mV
+    n = np.array(Mn_temp.n)
                
-    return M, Mv, Mn
+    return Spikes, t, V, n
     
     
 def find_points(Cm=Cm, Iapp=Iapp):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    M, Mv, Mn = get_simulation(Cm=Cm, Iapp=Iapp, number = 2, v0=[-100, 0]*mV, n0=[.1,.1], duration=1000*ms, I_noise=0*uA)
-    node = max(Mv.v[0])
-    cycle_boundary= min (Mv.v[1])
+    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 2, v0=[-100, 0]*mV, n0=[.1,.1], duration=1000*ms, I_noise=0*uA)
+    node = max(V[0])
+    cycle_boundary= min (V[1])
     return node, cycle_boundary
     
 def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=duration, I_noise=I_noise):
@@ -102,29 +101,41 @@ def plot_everything(Cm=Cm, Iapp=Iapp, number =1, v0=-55*mV, n0=.1, duration=dura
     #setting threshold in the middle between the node and the limit cycle
     thresh = .5*(node+cycle_boundary)
       
-    M, Mv, Mn = get_simulation(Cm, Iapp, number, v0, n0, duration, I_noise)
-       
-    plot_voltage_trace(Mv)
-    plot_trajectories(Mv,Mn, node, cycle_boundary)
-    plot_histograms(M,Mv,thresh) 
+    try: 
     
-    file_name=str(Cm)+' '+str(Iapp)+' '+str(v0)+' '+str(n0)+' '+str(duration/second)+' s '+str(I_noise)
-    plt.savefig('histograms/'+file_name+'.png')
-
-def plot_voltage_trace(Mv):
+        Spikes, Min_Volt = get_simulation(Cm, Iapp, number, v0, n0, duration, I_noise)
+        print('Other plots are already generated')
+        plot_histograms(Spikes, Min_Volt, thresh)
+        
+    except IOError:
+        Spikes, t, V, n= simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
+        Min_Volt= find_period_minima(V.flatten(),t, Spikes)
+        plot_voltage_trace(t,V)
+        plot_trajectories(V,n, node, cycle_boundary)
+        plot_histograms(Spikes,Min_Volt,thresh) 
+        
+        file_name=str(Cm)+' '+str(Iapp)+' '+str(v0)+' '+str(n0)+' '+str(duration/second)+' s '+str(I_noise)
+        plt.savefig('histograms/'+file_name+'.png')
+        
+        data_generated =  {'Spikes':Spikes,'Min_Volt':Min_Volt}
+        with open('simulations/'+file_name, 'wb') as f:
+            pickle.dump(data_generated, f)
+        
+  
+def plot_voltage_trace(t,V):
     '''plots voltage against time'''
     plt.figure()
     plt.title(str(Cm) + ' ' + str(Iapp)+' '+ str(I_noise))
-    plt.plot(Mv.t, Mv.v.T)
+    plt.plot(t, V.T)
     plt.show()
 
-def plot_trajectories(Mv,Mn,node=0, cycle_boundary=0, xlim=(-65,-50)):
+def plot_trajectories(V,n,node=0, cycle_boundary=0, xlim=(-65,-50)):
     '''plots trajectories of neurons in V-n plane'''
     plt.figure()
     plt.subplot(1,2,1)
-    plt.plot(Mv.v.T,Mn.n.T)
+    plt.plot(V.T,n.T)
     plt.subplot(1,2,2)
-    plt.plot(Mv.v.T,Mn.n.T)
+    plt.plot(V.T,n.T)
     plt.axvline(x=node)
     plt.axvline(x=cycle_boundary)
     plt.xlabel('mV')
@@ -133,40 +144,39 @@ def plot_trajectories(Mv,Mn,node=0, cycle_boundary=0, xlim=(-65,-50)):
     plt.ylim((-0.1,1))
     plt.show()
 
-def find_period_minima(timecourse, section_indices):
+def find_period_minima(timecourse, time, section_array):
+    print()
+    section_indices = np.where(np.in1d(time, section_array))[0]
     minima = np.empty(section_indices.shape[0]-1)
     for i in range(section_indices.shape[0]-1):
         minima[i] = np.min(timecourse[section_indices[i]:section_indices[i+1]])
     return minima
         
     
-def classify_ISI_indices(M,Mv, thresh =-59.5):
+def classify_ISI_indices(Min_Volt, thresh =-59.5):
     '''returns tuple: indices of spikes after which there is a quiet interval,
                       indices of spikes after which there is a burst interval '''
     
-    spike_indices = np.where(np.in1d(Mv.t, M.t))[0]
-    voltage_minima = find_period_minima(Mv.v.flatten(),spike_indices)
-    indices_quiet = np.where(voltage_minima < thresh)
-    indices_burst = np.where(voltage_minima >= thresh)
+    indices_quiet = np.where(Min_Volt < thresh)
+    indices_burst = np.where(Min_Volt >= thresh)
     return indices_quiet, indices_burst
 
-def calculate_ISI(M):
+def calculate_ISI(Spikes):
     '''calculates all ISIs lengths'''
-    return np.diff(M.t)
+    return np.diff(Spikes)
     
-def classify_ISI_lengths(M,Mv, thresh =-59.5):
+def classify_ISI_lengths(Spikes, Min_Volt, thresh =-59.5):
     '''calculates ISI lengths and classifies them into quiet and burst'''
-    indices_quiet, indices_burst = classify_ISI_indices(M,Mv, thresh)
-    ISI = calculate_ISI(M)
+    indices_quiet, indices_burst = classify_ISI_indices(Min_Volt, thresh)
+    ISI = calculate_ISI(Spikes)
     ISI_quiet = ISI[indices_quiet]
     ISI_burst = ISI[indices_burst]
     return ISI, ISI_quiet, ISI_burst
     
-def plot_histograms(M,Mv, thresh =-59.5):
+def plot_histograms(Spikes, Min_Volt, thresh =-59.5):
     '''plots histogram for ISIs and classified ISIs'''
-    ISI, ISI_quiet, ISI_burst = classify_ISI_lengths(M, Mv, thresh)
+    ISI, ISI_quiet, ISI_burst = classify_ISI_lengths(Spikes, Min_Volt, thresh)
         
-    
     plt.subplot(1,3,1)
     plt.title('All '+ str(ISI.shape[0]) + ' ISIs. ')
     plt.hist(ISI)
