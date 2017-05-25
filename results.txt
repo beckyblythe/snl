@@ -1,0 +1,55 @@
+1.7 140 150 hard to switch from  quiet
+	210 quiet dominates                     simulate longer
+    150 70 hard to switch from quiet
+        150 good
+    158 150 looks good	 			---histogram
+	120 					simulate longer
+    160 150 looks good, 			simulate longer
+    161 after saddle-node bifurcation
+    
+
+1.8 100 seems impossible to jump back from quiet area
+    140 400 kinda works
+    150 seems impossible to jump from bursting with reasonable noise strength
+    160 seems impossible to jump from bursting with reasonable noise strength   ?reasonable
+
+1.9 140 400 not switching to quiet 
+	1000 good
+
+1.65 158 70 looks good 				---histogram
+
+1.6 158 no limit cycle yet + something weird with the node and determination of min loop
+	seems like 1.6 is before SNL bifurcation
+
+1.64 first value after SNL bifurcation
+     155 no limit cycle yet
+     157 is the first with limit cycle 
+     158 70 looks promising 			simulate for longer + saddle and node are really close!
+         50 really good not that many bursts	simulate longer
+	 30 seems impossible to jump from quiet
+     160 70 promising
+	 50 ok
+	 30 2 switches from burst
+     161 after saddle-node bifurcation
+
+
+1.75 158 150 impossible to jump from bursting
+	 170 still hard, 1 jump in 10 s
+	 190 still hard
+
+1.74 160 saddle and node are really close 
+	 210 hard to switch to quiet
+	 230 looks good
+     158 190 4 switches
+	 210 9 switches
+     150 210 4 switches, but also hard to switch back
+     140  210 simulate for longer 
+
+
+try 1.75 ---find limits for Cm
+
+try different currents where it works for some
+
+	
+	
+		  

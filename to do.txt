@@ -4,14 +4,18 @@
 -to save only spike times and minimal voltage for each interval + save plots of phase plane  and voltage trace in separate folders
 -to check axis, labels etc.
 -to make it possible to save all images together at once (for now it's ok to save only histograms)
-
+-check if threshold is ok for different parameters - seems so
 
 -------------------------------------------------------------
 
--to check what is with 1.6
+
 -to do str(weights) ordered right. now - 0.5 0 1
 -is it possible to open existing pictures when parameters are called?
--check if threshold is ok for different parameters
+-to change try except to if
+
+-maybe to create a chart to look at different distributions in one picture
+
+-to think what tau value for noise is reaonable. noise current mean could be bigger then what I'm using
 
 
 

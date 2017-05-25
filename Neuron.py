@@ -109,7 +109,8 @@ def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n
         plt.show()
         Min_Volt= find_period_minima(V.flatten(),t, Spikes)
         plot_histograms(Spikes,Min_Volt,thresh) 
-        plt.savefig('histograms/'+file_name+'  '+str(weight)+'.png')
+        if duration/ms >=50000:
+            plt.savefig('histograms/'+file_name+'  '+str(weight)+'.png')
         plt.show()
         
         data_generated =  {'Spikes':Spikes,'Min_Volt':Min_Volt}
@@ -143,9 +144,7 @@ def plot_traces(t,V,n,node, cycle_boundary):
     
             
 def find_period_minima(timecourse, time, section_array):
-    print()
     section_indices = np.where(np.in1d(time, section_array))[0]
-    print(section_indices.shape[0])
     minima = np.empty(section_indices.shape[0]-1)
     for i in range(section_indices.shape[0]-1):
         minima[i] = np.min(timecourse[section_indices[i]:section_indices[i+1]])
@@ -201,10 +200,10 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 1.8*uF # /cm**2
-Iapp = .15*uA
-I_noise = .08*uA
-duration = 10000*ms
+Cm = 1.64*uF # /cm**2
+Iapp = .158*uA
+I_noise = 0.07*uA
+duration = 500000*ms
 
 weight=.5
 
