@@ -8,6 +8,10 @@
 
 -------------------------------------------------------------
 
+-divide quiet ISIs into parts. look if we can neglect going to node time.
+
+
+-division is so messy! to rewrite when in good shape 
 
 -to do str(weights) ordered right. now - 0.5 0 1
 -is it possible to open existing pictures when parameters are called?
@@ -15,7 +19,7 @@
 
 -maybe to create a chart to look at different distributions in one picture
 
--to think what tau value for noise is reaonable. noise current mean could be bigger then what I'm using
+-to think what tau value for noise is reasonable. noise current mean could be bigger then what I'm using
 
 
 
