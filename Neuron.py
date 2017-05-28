@@ -141,58 +141,21 @@ def plot_traces(t,V,n,node, cycle_boundary):
               max(node-2*(cycle_boundary-node),cycle_boundary+2*(cycle_boundary-node))))
     plt.ylim((-.1,.5))
     
-#def find_spikes_indices(t, spikes):
-#    indices = np.where(np.in1d(t, Spikes))[0]
-#    return indices
-#                
-#
-#    
-#def find_period_minima(V, t, spikes_indices):
-#    minima = np.empty(spikes_indices.shape[0]-1)
-#    minima_times= np.empty(spikes_indices.shape[0]-1)
-#    for i in range(spikes_indices.shape[0]-1):
-#        minima[i] = np.min(V[spikes_indices[i]:spikes_indices[i+1]])
-#        minima_times[i] = t[spikes_indices[i]+np.argmin(V[spikes_indices[i]:spikes_indices[i+1]])]
-#    return minima, minima_times 
-#
-#def find_thresh_crossing(V,t, Spikes, spikes_indices, indices_quiet, thresh):
-#    crossing_down=np.empty(indices_quiet.shape[0])       
-#    crossing_up=np.empty(indices_quiet.shape[0])
-#    for i in range(indices_quiet):
-#        crossing_down[i]=t[spikes_indices[i]+np.argmin(np.where(V[spikes_indices[indices_quiet[i]]:spikes_indices[indices_quiet[i]]+1]<=thresh))]
-#        crossing_up[i]  =t[spikes_indices[i]+np.argmax(np.where(V[spikes_indices[indices_quiet[i]]:spikes_indices[indices_quiet[i]]+1]<=thresh))]
-#    time_above_thresh = calculate_ISI(Spikes)-(crossing_up-crossing_down)
-#    minima, minima_times = find_period_minima(V, t, spikes_indices)
-#    time_btw_thresh_and_min = minima_times-crossing_down
-#    time_btw_min_and_thresh = crossing_up - minima_times
-#    return time_above_thresh, time_btw_thresh_and_min, time_btw_min_and_thresh
-#    
-#
-#    
-#def classify_ISI_indices(Min_Volt, thresh):
-#    '''returns tuple: indices of spikes after which there is a quiet interval,
-#                      indices of spikes after which there is a burst interval '''
-#    indices_quiet = np.where(Min_Volt < thresh)
-#    indices_burst = np.where(Min_Volt >= thresh)
-#    return indices_quiet, indices_burst
-
 def quiet_stats(t, V, Spikes, thresh):
-    below_thresh = np.where((V<=thresh) & (t>Spikes[0]) & (t < Spikes[-1]))
+    below_thresh = (V<=thresh) & (t>Spikes[0]) & (t < Spikes[-1])
     quiet_ISI_indices = np.unique(np.searchsorted(Spikes, t[below_thresh]))-1
     spike_times_indices = np.searchsorted(t, Spikes)
     Min_Volt = np.empty(quiet_ISI_indices.shape[0])
     Min_t    = np.empty(quiet_ISI_indices.shape[0])
     Crossing_down = np.empty(quiet_ISI_indices.shape[0])
     Crossing_up = np.empty(quiet_ISI_indices.shape[0])
-#    print(np.searchsorted(Spikes, below_thresh))
     
     for i in range(quiet_ISI_indices.shape[0]):        
         Slice=np.arange(spike_times_indices[quiet_ISI_indices[i]],spike_times_indices[quiet_ISI_indices[i]+1])
         Min_Volt[i] = np.min(V[Slice])
         Min_t[i]    = t[quiet_ISI_indices[i]+np.argmin(V[Slice])]    
-        print(Slice)
-        Crossing_down[i] = t[quiet_ISI_indices[i] + np.min(below_thresh[Slice])]
-        Crossing_up[i] = t[quiet_ISI_indices[i] + np.max(below_thresh[Slice])]
+        Crossing_down[i] = t[quiet_ISI_indices[i] + np.min(np.nonzero(below_thresh[Slice]))]
+        Crossing_up[i] = t[quiet_ISI_indices[i] + np.max(np.nonzero(below_thresh[Slice]))]
     return quiet_ISI_indices, Min_Volt, Min_t, Crossing_down, Crossing_up 
     
 def calculate_quiet_ISIs_partition(ISI_quiet, Min_t, Crossing_down, Crossing_up):
@@ -214,31 +177,29 @@ def calculate_ISI(Spikes):
     '''calculates all ISIs lengths'''
     return np.diff(Spikes)
     
-#def classify_ISI_lengths(Spikes, Min_Volt, thresh):
-#    '''calculates ISI lengths and classifies them into quiet and burst'''
-#    indices_quiet, indices_burst = classify_ISI_indices(Min_Volt, thresh)
-#    ISI = calculate_ISI(Spikes)
-#    ISI_quiet = ISI[indices_quiet]
-#    ISI_burst = ISI[indices_burst]
-#    return ISI, ISI_quiet, ISI_burst
-    
 def plot_histograms(ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up):
     '''plots histogram for ISIs and classified ISIs'''
             
-    plt.figure()
-    plt.subplot(1,3,1)
+    plt.figure(figsize = (12,8))
+    plt.subplot(2,3,1)
     plt.title('All '+ str(ISI.shape[0]) + ' ISIs. ')
     plt.xlabel('ISI (s)')
     plt.ylabel('# ISIs')
     plt.hist(ISI)
-    plt.subplot(1,3,2)
+    plt.subplot(2,3,2)
     plt.title(str(ISI_quiet.shape[0]) + ' Quiet ISIs')
     plt.xlabel('ISI (s)')
     plt.hist(ISI_quiet)
-    plt.subplot(1,3,3)
+    plt.subplot(2,3,3)
     plt.title(str(ISI_burst.shape[0]) + ' Burst ISIs')
     plt.xlabel('ISI (s)')
     plt.hist(ISI_burst)
+    plt.subplot(2,3,4)
+    plt.hist(time_above)
+    plt.subplot(2,3,5)
+    plt.hist(time_down)
+    plt.subplot(2,3,6)
+    plt.hist(time_up)
     
     
 defaultclock.dt = 0.05*ms
@@ -255,7 +216,7 @@ tau=1*ms
 Cm = 1.64*uF # /cm**2
 Iapp = .158*uA
 I_noise = 0.07*uA
-duration = 10000*ms
+duration = 500000*ms
 
 weight=.5
 

@@ -10,6 +10,8 @@
 
 -divide quiet ISIs into parts. look if we can neglect going to node time.
 
+-axis, labels! min_volt_hist. node instead of min?
+
 
 -division is so messy! to rewrite when in good shape 
 
