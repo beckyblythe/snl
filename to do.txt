@@ -8,6 +8,8 @@
 
 -------------------------------------------------------------
 
+to continue working with hists. Burst ISIs have the peak in the beginnig
+
 -divide quiet ISIs into parts. look if we can neglect going to node time.
 
 -axis, labels! min_volt_hist. node instead of min?
