@@ -88,7 +88,7 @@ def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n
     thresh,node,cycle_boundary = set_thresh(Cm, Iapp, weight)
     
     file_name=str(Cm)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise) + ' '+str(weight)
-    
+    print(file_name)
     try:     
         data= get_simulation(file_name)
         print('Other plots are already generated. Find them in traces folder.')
@@ -197,7 +197,7 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.title('All '+ str(ISI.shape[0]) + ' ISIs. ')
     plt.xlabel('ISI (s)')
     plt.ylabel('Distribution of ISIs')
-    plt.xlim((0,10))
+    plt.xlim((0,5))
     plt.hist(ISI, normed = True)
     plt.axvline(ISI.mean(), color = 'r')
     plt.subplot(2,3,2)
@@ -205,7 +205,7 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.xlabel('ISI (s)')
     plt.hist(ISI_quiet, normed = True)
     plt.axvline(ISI_quiet.mean(), color = 'r')
-    plt.xlim((0,10))
+    plt.xlim((0,5))
     plt.subplot(2,3,3)
     plt.title(str(ISI_burst.shape[0]) + ' Burst ISIs')
     plt.xlabel('ISI (s)')
@@ -224,7 +224,7 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.hist(time_up, normed = True)
     plt.axvline(time_up.mean(), color = 'r')
     plt.xlabel('time (s)')
-    plt.xlim((0,10))
+    plt.xlim((0,5))
     plt.subplot(2,3,6)
     plt.title('Time above the thresh')
     plt.hist(time_above, normed = True)
@@ -249,7 +249,7 @@ Iapp = .158*uA
 I_noise = 0.15*uA
 duration = 500000*ms
 
-weight=0 #after data is saved we can't change weight anymore
+weight=.6 #after data is saved we can't change weight anymore
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
