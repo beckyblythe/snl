@@ -9,7 +9,7 @@
     
 
 1.8 100 seems impossible to jump back from quiet area
-    140 400 kinda works
+    140 400 kinda works                         ---histogram
     150 seems impossible to jump from bursting with reasonable noise strength
     160 seems impossible to jump from bursting with reasonable noise strength   ?reasonable
 

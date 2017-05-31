@@ -244,12 +244,12 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 1.7*uF # /cm**2
-Iapp = .158*uA
-I_noise = 0.15*uA
+Cm = 1.8*uF # /cm**2
+Iapp = .140*uA
+I_noise = 0.4*uA
 duration = 500000*ms
 
-weight=.6 #after data is saved we can't change weight anymore
+weight=.3 #after data is saved we can't change weight anymore
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
