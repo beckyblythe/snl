@@ -8,6 +8,7 @@ class Object(object):
 
 
 plt.rcParams['figure.figsize'] = 12, 4
+plt.rcParams['agg.path.chunksize'] = 10000
 
 
 
@@ -38,7 +39,7 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(Cm, Iapp, v0=[-70,-65,-60.5,-59.5,-55,-50]*mV,n0=[.3,.3,.3, 0,0,0]):
+def find_points(Cm, Iapp, v0=[-70,-62,-60.5,-59.5,-58,-50]*mV,n0=[.3,.3,.3, 0,0,0]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=2000*ms, I_noise=0*uA)
@@ -244,12 +245,12 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 1.8*uF # /cm**2
+Cm = 2.0*uF # /cm**2
 Iapp = .140*uA
-I_noise = 0.4*uA
-duration = 500000*ms
+I_noise = 1.0*uA
+duration = 10000*ms
 
-weight=.3 #after data is saved we can't change weight anymore
+weight=.9 #after data is saved we can't change weight anymore
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -263,6 +264,9 @@ dn/dt = 5*(alpha_n*(1-n)-beta_n*n) : 1
 alpha_n = -0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz
 beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
 '''
+
+fp=eqs.fixedpoint()
+print(fp)
 
 plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
