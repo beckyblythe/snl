@@ -5,21 +5,16 @@
 -to check axis, labels etc.
 -to make it possible to save all images together at once (for now it's ok to save only histograms)
 -check if threshold is ok for different parameters - seems so
+?to continue working with hists. Burst ISIs have the peak in the beginnig
+-divide quiet ISIs into parts. look if we can neglect going to node time.
+-axis, labels! min_volt_hist. node instead of min?
 
 -------------------------------------------------------------
 
 
-===Try to find fixed points!
+===Try to find fixed points! + separatrix (close to linear, so just find stable direction and prolong it). How to do it? Ask!
+Its actually about how close separatrix is to the limit cycle
 
-
-to continue working with hists. Burst ISIs have the peak in the beginnig
-
--divide quiet ISIs into parts. look if we can neglect going to node time.
-
--axis, labels! min_volt_hist. node instead of min?
-
-
--division is so messy! to rewrite when in good shape 
 
 -to do str(weights) ordered right. now - 0.5 0 1
 -is it possible to open existing pictures when parameters are called?

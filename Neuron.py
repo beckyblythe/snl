@@ -146,6 +146,7 @@ def plot_traces(t,V,n,node, cycle_boundary):
     plt.ylim((-.1,.5))
     
 def quiet_stats(t, V, Spikes, thresh,node):
+    '''Now we count as quiet ISIs where V reached the node value'''
     #array of booleans, length = length of t array
     below_thresh = (V<=thresh) & (t>Spikes[0]) & (t < Spikes[-1])
     below_node = (V<=node) & (t>Spikes[0]) & (t < Spikes[-1])
@@ -245,12 +246,12 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 2.0*uF # /cm**2
-Iapp = .140*uA
-I_noise = 1.0*uA
+Cm = 2.1*uF # /cm**2
+Iapp = .160*uA
+I_noise = 1.5*uA
 duration = 10000*ms
 
-weight=.9 #after data is saved we can't change weight anymore
+weight=.3 #after data is saved we can't change the weight anymore
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -265,8 +266,7 @@ alpha_n = -0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz
 beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
 '''
 
-fp=eqs.fixedpoint()
-print(fp)
+
 
 plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
