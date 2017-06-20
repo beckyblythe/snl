@@ -19,12 +19,13 @@ def get_simulation(file_name):
         data_loaded = pickle.load(f)
     return data_loaded        
 
-def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
+def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise,h0=0):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation    
     neuron = NeuronGroup(number, eqs,  threshold = 'v >-.01*volt', refractory = 'v > -.01*volt')
     neuron.v = v0 
     neuron.n = n0
+    neuron.h = h0
     
     M_temp = SpikeMonitor(neuron, variables = 'v')
     Mv_temp = StateMonitor(neuron, 'v', record=True)
@@ -192,7 +193,7 @@ def calculate_ISI(Spikes):
     
 def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up):
     '''plots histogram for ISIs and classified ISIs'''
-          
+    
     plt.figure(figsize = (12,8))
     
     plt.subplot(2,3,1)
@@ -246,12 +247,12 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 2.1*uF # /cm**2
-Iapp = .160*uA
-I_noise = 1.5*uA
-duration = 10000*ms
+Cm = 1.8*uF # /cm**2
+Iapp = .140*uA
+I_noise = 0.4*uA
+duration = 500000*ms
 
-weight=.3 #after data is saved we can't change the weight anymore
+weight=0.3 #after data is saved we can't change the weight anymore
 
 eqs = '''
 dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
@@ -268,7 +269,34 @@ beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
 
 
 
-plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
+#plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
+
+thresh, node, cycle_boundary = set_thresh(Cm, Iapp)
+number=10000
+
+h0=np.ones(number)*(-0.1*(node+35)/(exp(-0.1*(node+35))-1))/((-0.1*(node+35)/(exp(-0.1*(node+35))-1))+(1./(exp(-0.1*(node+28))+1)))
+v0=np.ones(number)*node*mV
+n0=np.ones(number)*.1
+duration=1000*ms
+
+Spikes, t, V, n = simulate_neuron(Cm, Iapp, number, v0, n0,duration , I_noise,h0)
+
+lines = np.where(np.max(V[:,:int(V.shape[1]/4)], axis = 1)<thresh)
+plt.hist(V[lines,int(V.shape[1]/4)].T, bins = 20)
+plt.axvline(node)
+plt.axvline(thresh)
+plt.show()
+
+lines = np.where(np.max(V[:,:int(V.shape[1]/2)], axis = 1)<thresh)
+plt.hist(V[lines,int(V.shape[1]/2)].T, bins = 20)
+plt.axvline(node)
+plt.axvline(thresh)
+plt.show()
+lines = np.where(np.max(V, axis = 1)<thresh)
+plt.hist(V[lines,-1].T, bins = 20)
+plt.axvline(node)
+plt.axvline(thresh)
+plt.show()
 
         
 
