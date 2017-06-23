@@ -15,6 +15,12 @@
 ===Try to find fixed points! + separatrix (close to linear, so just find stable direction and prolong it). How to do it? Ask!
 Its actually about how close separatrix is to the limit cycle
 
+Why if we start from thresh  even without without noise everything is still going right????
+staring h value changes a picture a lot! we have to come out with how to pick it (is it always in the same regime after running for some time? should be
+3d plots?
+
+to save the data
+
 
 -to do str(weights) ordered right. now - 0.5 0 1
 -is it possible to open existing pictures when parameters are called?
