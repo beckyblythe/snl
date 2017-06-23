@@ -21,6 +21,8 @@ staring h value changes a picture a lot! we have to come out with how to pick it
 
 to save the data
 
+do the for loop for gods sake. thats a shame!!!!!
+
 
 -to do str(weights) ordered right. now - 0.5 0 1
 -is it possible to open existing pictures when parameters are called?

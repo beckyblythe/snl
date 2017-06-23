@@ -272,13 +272,13 @@ beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
 #plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
 thresh, node, cycle_boundary = set_thresh(Cm, Iapp, weight)
-number=10000
+number=1000
 
 
-v0=np.ones(number)*thresh*mV
-h0=np.ones(number)*.9#(-0.1*(node+35)/(exp(-0.1*(node+35))-1))/((-0.1*(node+35)/(exp(-0.1*(node+35))-1))+(1./(exp(-0.1*(node+28))+1)))
-n0=np.ones(number)*.124#(-0.01*(node+34)/(exp(-0.1*(node+34))-1))/((-0.01*(node+34)/(exp(-0.1*(node+34))-1))+(.125*(exp(-(node+44)/80))))
-duration=200*ms
+v0=np.ones(number)*node*mV
+h0=np.ones(number)*(0.1*(node+35)/(exp(-0.1*(node+35))-1))/((-0.1*(node+35)/(exp(-0.1*(node+35))-1))+(1./(exp(-0.1*(node+28))+1)))
+n0=np.ones(number)*(-0.01*(node+34)/(exp(-0.1*(node+34))-1))/((-0.01*(node+34)/(exp(-0.1*(node+34))-1))+(.125*(exp(-(node+44)/80))))
+duration=50000*ms
 
 Spikes, t, V, n = simulate_neuron(Cm, Iapp, number, v0, n0,duration , I_noise,h0)
 lines = np.arange(V.shape[0])
@@ -293,20 +293,21 @@ plt.subplot(2,3,1)
 plt.hist(V[lines,int(V.shape[1]/6)].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
+plt.xlim((-70,-50))
 
 plt.subplot(2,3,2)
 #lines = np.where(np.max(V[:,:int(V.shape[1]*2/6)], axis = 1)<=thresh)
 plt.hist(V[lines,int(V.shape[1]*2/6)].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
-
+plt.xlim((-70,-50))
 
 plt.subplot(2,3,3)
 #lines = np.where(np.max(V[:,:int(V.shape[1]*3/6)], axis = 1)<=thresh)
 plt.hist(V[lines,int(V.shape[1]*3/6)].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
-
+plt.xlim((-70,-50))
 
 
 plt.subplot(2,3,4)
@@ -314,20 +315,21 @@ plt.subplot(2,3,4)
 plt.hist(V[lines,int(V.shape[1]*4/6)].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
-
+plt.xlim((-70,-50))
 
 plt.subplot(2,3,5)
 #lines = np.where(np.max(V[:,:int(V.shape[1]*5/6)], axis = 1)<=thresh)
 plt.hist(V[lines,int(V.shape[1]*5/6)].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
-
+plt.xlim((-70,-50))
 
 plt.subplot(2,3,6)
 #lines = np.where(np.max(V, axis = 1)<=thresh)
 plt.hist(V[lines,-1].T, bins = 50)
 plt.axvline(node)
 plt.axvline(cycle_boundary)
+plt.xlim((-70,-50))
 
 plt.tight_layout() 
 plt.show()
