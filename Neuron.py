@@ -19,13 +19,13 @@ def get_simulation(file_name):
         data_loaded = pickle.load(f)
     return data_loaded        
 
-def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise,h0=0):
+def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation    
     neuron = NeuronGroup(number, eqs,  threshold = 'v >-.01*volt', refractory = 'v > -.01*volt')
     neuron.v = v0 
     neuron.n = n0
-    neuron.h = h0
+    
     
     M_temp = SpikeMonitor(neuron, variables = 'v')
     Mv_temp = StateMonitor(neuron, 'v', record=True)
@@ -40,10 +40,10 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise,h0=0):
                
     return Spikes, t, V, n    
     
-def find_points(Cm, Iapp, v0=[-70,-62,-60.5,-59.5,-58,-50]*mV,n0=[.3,.3,.3, 0,0,0]):
+def find_points(Cm, Iapp, v0=[-55,-53,-49, -62,-59,-55]*mV,n0=[.1,.1,.1, -.1,-.1,-.1]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=2000*ms, I_noise=0*uA)
+    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=5000*ms, I_noise=0*uA)
     node = max(V[0])
     cycle_boundary= min (V[-1])
     
@@ -129,7 +129,7 @@ def plot_traces(t,V,n,node, cycle_boundary):
     plt.xlabel('time (s)')
     plt.ylabel('voltage (mV)')
     plt.plot(t, V.T) 
-    plt.axhline(y=node, linestyle = ':',color = 'm')
+#    plt.axhline(y=node, linestyle = ':',color = 'm')
     plt.subplot2grid((2,2),(1,0))
     plt.title('Trajectory in V-n plane')
     plt.xlabel('voltage (mV)')
@@ -236,38 +236,39 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.xlim((0,1))
     plt.tight_layout()  
     
-defaultclock.dt = 0.05*ms
+defaultclock.dt = 0.01*ms
 
 
-gL = 0.1*msiemens
-EL = -65*mV
-ENa = 55*mV
-EK = -90*mV
-gNa = 35*msiemens
-gK = 9*msiemens
-tau=1*ms
+Cm = 1 * uF #/cm2
+g_L = 8 * msiemens #/cm2
+g_Na = 20 * msiemens#/cm2
+g_K = 10 * msiemens #/cm2
+E_L = -80 * mV
+E_Na = 60 * mV
+E_K = -90 * mV
 
-Cm = 1.74*uF # /cm**2
-Iapp = .160*uA
-I_noise = .07*uA
-duration = 500000*ms
+tau = 1.0*ms
+
+tau_n = .155*ms
+Iapp = 4 * uA #/cm**2
+I_noise = .0*uA
+duration = 5000*ms
 
 weight=.5 #after data is saved we can't change the weight anymore
 
 eqs = '''
-dv/dt = (-gNa*m**3*h*(v-ENa)-gK*n**4*(v-EK)-gL*(v-EL)+Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
-m = alpha_m/(alpha_m+beta_m) : 1
-alpha_m = -0.1/mV*(v+35*mV)/(exp(-0.1/mV*(v+35*mV))-1)/ms : Hz
-beta_m = 4*exp(-(v+60*mV)/(18*mV))/ms : Hz
-dh/dt = 5*(alpha_h*(1-h)-beta_h*h) : 1
-alpha_h = 0.07*exp(-(v+58*mV)/(20*mV))/ms : Hz
-beta_h = 1./(exp(-0.1/mV*(v+28*mV))+1)/ms : Hz
-dn/dt = 5*(alpha_n*(1-n)-beta_n*n) : 1
-alpha_n = -0.01/mV*(v+34*mV)/(exp(-0.1/mV*(v+34*mV))-1)/ms : Hz
-beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
+dv/dt = (-I_Na - I_K -  I_L + Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
+dn/dt = (n_inf-n)/tau_n : 1
+
+I_Na = g_Na*m_inf*(v-E_Na) : amp
+I_K = g_K*n*(v-E_K) : amp
+I_L = g_L*(v-E_L) : amp
+
+n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
+m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-
+find_points(Cm, Iapp)
 
 #plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
