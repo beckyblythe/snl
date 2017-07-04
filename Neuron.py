@@ -247,8 +247,8 @@ gNa = 35*msiemens
 gK = 9*msiemens
 tau=1*ms
 
-Cm = 1.64*uF # /cm**2
-Iapp = .158*uA
+Cm = 1.74*uF # /cm**2
+Iapp = .160*uA
 I_noise = .07*uA
 duration = 500000*ms
 
@@ -271,68 +271,68 @@ beta_n = 0.125*exp(-(v+44*mV)/(80*mV))/ms : Hz
 
 #plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
-thresh, node, cycle_boundary = set_thresh(Cm, Iapp, weight)
-number=1000
-
-
-v0=np.ones(number)*node*mV
-h0=np.ones(number)*(0.1*(node+35)/(exp(-0.1*(node+35))-1))/((-0.1*(node+35)/(exp(-0.1*(node+35))-1))+(1./(exp(-0.1*(node+28))+1)))
-n0=np.ones(number)*(-0.01*(node+34)/(exp(-0.1*(node+34))-1))/((-0.01*(node+34)/(exp(-0.1*(node+34))-1))+(.125*(exp(-(node+44)/80))))
-duration=50000*ms
-
-Spikes, t, V, n = simulate_neuron(Cm, Iapp, number, v0, n0,duration , I_noise,h0)
-lines = np.arange(V.shape[0])
-
-#plt.plot(V.T,n.T)
+#thresh, node, cycle_boundary = set_thresh(Cm, Iapp, weight)
+#number=1000
+#
+#
+#v0=np.ones(number)*node*mV
+#h0=np.ones(number)*(0.1*(node+35)/(exp(-0.1*(node+35))-1))/((-0.1*(node+35)/(exp(-0.1*(node+35))-1))+(1./(exp(-0.1*(node+28))+1)))
+#n0=np.ones(number)*(-0.01*(node+34)/(exp(-0.1*(node+34))-1))/((-0.01*(node+34)/(exp(-0.1*(node+34))-1))+(.125*(exp(-(node+44)/80))))
+#duration=50000*ms
+#
+#Spikes, t, V, n = simulate_neuron(Cm, Iapp, number, v0, n0,duration , I_noise,h0)
+#lines = np.arange(V.shape[0])
+#
+##plt.plot(V.T,n.T)
+##plt.axvline(node)
+##plt.axvline(cycle_boundary)
+#
+#plt.figure(figsize = (12,8))
+#plt.subplot(2,3,1)
+##lines = np.where(np.max(V[:,:int(V.shape[1]/6)], axis = 1)<=thresh)
+#plt.hist(V[lines,int(V.shape[1]/6)].T, bins = 50)
 #plt.axvline(node)
 #plt.axvline(cycle_boundary)
-
-plt.figure(figsize = (12,8))
-plt.subplot(2,3,1)
-#lines = np.where(np.max(V[:,:int(V.shape[1]/6)], axis = 1)<=thresh)
-plt.hist(V[lines,int(V.shape[1]/6)].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-plt.subplot(2,3,2)
-#lines = np.where(np.max(V[:,:int(V.shape[1]*2/6)], axis = 1)<=thresh)
-plt.hist(V[lines,int(V.shape[1]*2/6)].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-plt.subplot(2,3,3)
-#lines = np.where(np.max(V[:,:int(V.shape[1]*3/6)], axis = 1)<=thresh)
-plt.hist(V[lines,int(V.shape[1]*3/6)].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-
-plt.subplot(2,3,4)
-#lines = np.where(np.max(V[:,:int(V.shape[1]*4/6)], axis = 1)<=thresh)
-plt.hist(V[lines,int(V.shape[1]*4/6)].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-plt.subplot(2,3,5)
-#lines = np.where(np.max(V[:,:int(V.shape[1]*5/6)], axis = 1)<=thresh)
-plt.hist(V[lines,int(V.shape[1]*5/6)].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-plt.subplot(2,3,6)
-#lines = np.where(np.max(V, axis = 1)<=thresh)
-plt.hist(V[lines,-1].T, bins = 50)
-plt.axvline(node)
-plt.axvline(cycle_boundary)
-plt.xlim((-70,-50))
-
-plt.tight_layout() 
-plt.show()
+#plt.xlim((-70,-50))
+#
+#plt.subplot(2,3,2)
+##lines = np.where(np.max(V[:,:int(V.shape[1]*2/6)], axis = 1)<=thresh)
+#plt.hist(V[lines,int(V.shape[1]*2/6)].T, bins = 50)
+#plt.axvline(node)
+#plt.axvline(cycle_boundary)
+#plt.xlim((-70,-50))
+#
+#plt.subplot(2,3,3)
+##lines = np.where(np.max(V[:,:int(V.shape[1]*3/6)], axis = 1)<=thresh)
+#plt.hist(V[lines,int(V.shape[1]*3/6)].T, bins = 50)
+#plt.axvline(node)
+#plt.axvline(cycle_boundary)
+#plt.xlim((-70,-50))
+#
+#
+#plt.subplot(2,3,4)
+##lines = np.where(np.max(V[:,:int(V.shape[1]*4/6)], axis = 1)<=thresh)
+#plt.hist(V[lines,int(V.shape[1]*4/6)].T, bins = 50)
+#plt.axvline(node)
+#plt.axvline(cycle_boundary)
+#plt.xlim((-70,-50))
+#
+#plt.subplot(2,3,5)
+##lines = np.where(np.max(V[:,:int(V.shape[1]*5/6)], axis = 1)<=thresh)
+#plt.hist(V[lines,int(V.shape[1]*5/6)].T, bins = 50)
+#plt.axvline(node)
+#plt.axvline(cycle_boundary)
+#plt.xlim((-70,-50))
+#
+#plt.subplot(2,3,6)
+##lines = np.where(np.max(V, axis = 1)<=thresh)
+#plt.hist(V[lines,-1].T, bins = 50)
+#plt.axvline(node)
+#plt.axvline(cycle_boundary)
+#plt.xlim((-70,-50))
+#
+#plt.tight_layout() 
+#plt.show()
         
 
     
