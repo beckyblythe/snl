@@ -7,7 +7,7 @@ class Object(object):
     pass
 
 
-plt.rcParams['figure.figsize'] = 12, 4
+plt.rcParams['figure.figsize'] = 12, 12
 plt.rcParams['agg.path.chunksize'] = 10000
 
 
@@ -40,10 +40,10 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(Cm, Iapp, v0=[-55,-53,-49, -62,-59,-55]*mV,n0=[.1,.1,.1, -.1,-.1,-.1]):
+def find_points(Cm, Iapp, v0=[-75,-65,-50, -65,-60,-55]*mV,n0=[.05,.05,.05, -.1,-.1,-.1]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=5000*ms, I_noise=0*uA)
+    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=2000*ms, I_noise=0*uA)
     node = max(V[0])
     cycle_boundary= min (V[-1])
     
@@ -236,6 +236,23 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.xlim((0,1))
     plt.tight_layout()  
     
+def plot_field(tau_n, Iapp):
+    print(tau_n, Iapp)
+    v_grid ,n_grid = np.meshgrid(np.linspace(-80,-40,50), np.linspace(-.05,.1,50))
+    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)-g_L*(v_grid*mV-E_L)+Iapp)/Cm)/mV*ms
+    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
+    norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+    dv_grid= np.divide(dv_grid,norm)
+    dn_grid= np.divide(dn_grid,norm)
+    
+    plt.figure()
+#    plt.axis('equal')
+    plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+   
+    
+   
+    
+    
 defaultclock.dt = 0.01*ms
 
 
@@ -250,7 +267,7 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 tau_n = .155*ms
-Iapp = 4 * uA #/cm**2
+Iapp = 2* uA #/cm**2
 I_noise = .0*uA
 duration = 5000*ms
 
@@ -268,7 +285,9 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-find_points(Cm, Iapp)
+plot_field(tau_n=tau_n, Iapp=Iapp)
+#find_points(Cm, Iapp)
+
 
 #plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 

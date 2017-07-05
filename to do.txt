@@ -10,6 +10,8 @@
 -axis, labels! min_volt_hist. node instead of min?
 
 -------------------------------------------------------------
+-Rewritr everything with tau_n as a parameter, maybe it's the problem!
+
 -J.-H. will give me a new 2D model. plot everything for it - see what happens!
 
 -Spykeviewer
