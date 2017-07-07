@@ -8,11 +8,14 @@
 ?to continue working with hists. Burst ISIs have the peak in the beginnig
 -divide quiet ISIs into parts. look if we can neglect going to node time.
 -axis, labels! min_volt_hist. node instead of min?
+-J.-H. will give me a new 2D model. plot everything for it - see what happens!
+-Rewrite everything with tau_n as a parameter, maybe it's the problem!
+ No, timestep was the prolem
 
 -------------------------------------------------------------
--Rewritr everything with tau_n as a parameter, maybe it's the problem!
+-Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
--J.-H. will give me a new 2D model. plot everything for it - see what happens!
+
 
 -Spykeviewer
 

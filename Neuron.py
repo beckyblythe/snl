@@ -19,10 +19,11 @@ def get_simulation(file_name):
         data_loaded = pickle.load(f)
     return data_loaded        
 
-def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
+def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation    
-    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.01*volt', refractory = 'v > -.01*volt')
+    print(tau_n, Iapp)
+    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.03*volt', refractory = 'v > -.03*volt')
     neuron.v = v0 
     neuron.n = n0
     
@@ -40,14 +41,14 @@ def simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(Cm, Iapp, v0=[-75,-65,-50, -65,-60,-55]*mV,n0=[.05,.05,.05, -.1,-.1,-.1]):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -65,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,-0]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spikes, t, V, n = simulate_neuron(Cm=Cm, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=2000*ms, I_noise=0*uA)
+    Spikes, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=1000*ms, I_noise=0*uA)
     node = max(V[0])
     cycle_boundary= min (V[-1])
     
-    file_name = str(Cm)+'  '+str(Iapp)
+    file_name = str(tau_n)+'  '+str(Iapp)
     
     plot_traces(t,V,n, node, cycle_boundary)
     plt.savefig('points/'+file_name+'.png') 
@@ -66,14 +67,14 @@ def get_points(file_name):
     
     return node, cycle_boundary
 
-def set_thresh(Cm, Iapp, weight=.5):
-    file_name = str(Cm)+'  '+str(Iapp)
+def set_thresh(tau_n, Iapp, weight=.5):
+    file_name = str(tau_n)+'  '+str(Iapp)
     
     try:
         node, cycle_boundary = get_points(file_name)
         print('Reading node and cycle boundary location from file.')
     except IOError:
-        node, cycle_boundary = find_points(Cm=Cm, Iapp=Iapp)
+        node, cycle_boundary = find_points(tau_n=tau_n, Iapp=Iapp)
     #setting threshold in the middle between the node and the limit cycle
         data_generated = {'node':node,'cycle_boundary':cycle_boundary}
         with open('points/'+file_name, 'wb') as f:
@@ -84,12 +85,12 @@ def set_thresh(Cm, Iapp, weight=.5):
     return thresh, node, cycle_boundary
         
     
-def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n0=0):
+def plot_everything(tau_n, Iapp, duration, I_noise, weight, number =1, v0=-30*mV, n0=-0):
     '''simulates neuron and plots all the available plots'''
     
-    thresh,node,cycle_boundary = set_thresh(Cm, Iapp, weight)
+    thresh,node,cycle_boundary = set_thresh(tau_n, Iapp, weight)
     
-    file_name=str(Cm)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise) + ' '+str(weight)
+    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise) + ' '+str(weight)
     print(file_name)
     try:     
         data= get_simulation(file_name)
@@ -100,7 +101,7 @@ def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n
         plt.show()
         
     except IOError:
-        Spikes, t, V, n= simulate_neuron(Cm, Iapp, number, v0, n0, duration, I_noise)
+        Spikes, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
         
                 
         plot_traces(t,V,n,node, cycle_boundary)
@@ -110,7 +111,7 @@ def plot_everything(Cm, Iapp, duration, I_noise, weight, number =1, v0=-50*mV, n
         V=V[-1]
         ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up = collect_ISI_stats(t, V, Spikes, thresh, node)
         plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up) 
-        if duration/ms >=50000:
+        if duration/ms >=10000:
             plt.savefig('histograms/'+file_name+'.png')
         plt.show()
         
@@ -200,7 +201,7 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.title('All '+ str(ISI.shape[0]) + ' ISIs. ')
     plt.xlabel('ISI (s)')
     plt.ylabel('Distribution of ISIs')
-    plt.xlim((0,5))
+#    plt.xlim((0,5))
     plt.hist(ISI, normed = True)
     plt.axvline(ISI.mean(), color = 'r')
     plt.subplot(2,3,2)
@@ -208,36 +209,36 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     plt.xlabel('ISI (s)')
     plt.hist(ISI_quiet, normed = True)
     plt.axvline(ISI_quiet.mean(), color = 'r')
-    plt.xlim((0,5))
+#    plt.xlim((0,5))
     plt.subplot(2,3,3)
     plt.title(str(ISI_burst.shape[0]) + ' Burst ISIs')
     plt.xlabel('ISI (s)')
     plt.hist(ISI_burst,normed = True)
     plt.axvline(ISI_burst.mean(), color = 'r')
-    plt.xlim((0,1))
+#    plt.xlim((0,1))
     plt.subplot(2,3,4)
     plt.title('Time from thresh to node')
     plt.hist(time_down, normed = True)
     plt.axvline(time_down.mean(), color = 'r')
     plt.xlabel('time (s)')
     plt.ylabel('Distribution of times')
-    plt.xlim((0,1))
+#    plt.xlim((0,1))
     plt.subplot(2,3,5)
     plt.title('Time from node to thresh')
     plt.hist(time_up, normed = True)
     plt.axvline(time_up.mean(), color = 'r')
     plt.xlabel('time (s)')
-    plt.xlim((0,5))
+#    plt.xlim((0,5))
     plt.subplot(2,3,6)
     plt.title('Time above the thresh')
     plt.hist(time_above, normed = True)
     plt.axvline(time_above.mean(), color = 'r')
     plt.xlabel('time (s)')
-    plt.xlim((0,1))
+#    plt.xlim((0,1))
     plt.tight_layout()  
     
 def plot_field(tau_n, Iapp):
-    print(tau_n, Iapp)
+#    print(tau_n, Iapp)
     v_grid ,n_grid = np.meshgrid(np.linspace(-80,-40,50), np.linspace(-.05,.1,50))
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)-g_L*(v_grid*mV-E_L)+Iapp)/Cm)/mV*ms
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
@@ -248,12 +249,9 @@ def plot_field(tau_n, Iapp):
     plt.figure()
 #    plt.axis('equal')
     plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
-   
-    
-   
     
     
-defaultclock.dt = 0.01*ms
+defaultclock.dt = 0.001*ms
 
 
 Cm = 1 * uF #/cm2
@@ -267,9 +265,9 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 tau_n = .155*ms
-Iapp = 2* uA #/cm**2
-I_noise = .0*uA
-duration = 5000*ms
+Iapp = 4* uA #/cm**2
+I_noise = 1*uA
+duration = 10000*ms
 
 weight=.5 #after data is saved we can't change the weight anymore
 
@@ -285,9 +283,7 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-plot_field(tau_n=tau_n, Iapp=Iapp)
-#find_points(Cm, Iapp)
-
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
 
 #plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
 
