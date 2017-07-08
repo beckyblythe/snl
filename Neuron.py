@@ -7,7 +7,7 @@ class Object(object):
     pass
 
 
-plt.rcParams['figure.figsize'] = 12, 12
+plt.rcParams['figure.figsize'] = 6, 6
 plt.rcParams['agg.path.chunksize'] = 10000
 
 
@@ -58,7 +58,8 @@ def find_points(tau_n, Iapp, v0=[-75,-65,-40, -65,-60,-50]*mV,n0=[.05,.05,-.1, -
         raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
     return node, cycle_boundary
     
-def get_points(file_name):
+def get_points(tau_n, Iapp):
+    file_name = str(tau_n)+'  '+str(Iapp)
     #read from file
     with open('points/'+file_name, 'rb') as f:
         data_loaded = pickle.load(f)
@@ -68,12 +69,12 @@ def get_points(file_name):
     return node, cycle_boundary
 
 def set_thresh(tau_n, Iapp, weight=.5):
-    file_name = str(tau_n)+'  '+str(Iapp)
     
     try:
         node, cycle_boundary = get_points(file_name)
         print('Reading node and cycle boundary location from file.')
     except IOError:
+        file_name = str(tau_n)+'  '+str(Iapp)
         node, cycle_boundary = find_points(tau_n=tau_n, Iapp=Iapp)
     #setting threshold in the middle between the node and the limit cycle
         data_generated = {'node':node,'cycle_boundary':cycle_boundary}
@@ -239,16 +240,35 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     
 def plot_field(tau_n, Iapp):
 #    print(tau_n, Iapp)
-    v_grid ,n_grid = np.meshgrid(np.linspace(-80,-40,50), np.linspace(-.05,.1,50))
+    v_grid ,n_grid = np.meshgrid(np.linspace(-70,-50,100), np.linspace(-0,.05,50))
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)-g_L*(v_grid*mV-E_L)+Iapp)/Cm)/mV*ms
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
-    norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
-    dv_grid= np.divide(dv_grid,norm)
-    dn_grid= np.divide(dn_grid,norm)
+    norm =  np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+    print(np.argmin(norm))
+#    dv_grid= np.divide(dv_grid,norm)
+#    dn_grid= np.divide(dn_grid,norm)
     
     plt.figure()
 #    plt.axis('equal')
     plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+    
+def find_saddle(tau_n, Iapp):
+    node, cycle_boundary=get_points(tau_n, Iapp)
+    v_grid ,n_grid = np.meshgrid(np.linspace(node+.05*(cycle_boundary-node),cycle_boundary,50), np.linspace(-0,.05,50))
+    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)-g_L*(v_grid*mV-E_L)+Iapp)/Cm)/mV*ms
+    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
+    norm =  np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+    saddle = (v_grid[np.unravel_index(norm.argmin(), norm.shape)],n_grid[np.unravel_index(norm.argmin(), norm.shape)])
+    print(saddle)
+    dv_grid= np.divide(dv_grid,norm)
+    dn_grid= np.divide(dn_grid,norm)
+    plt.figure()
+    plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+    return(saddle)
+    
+find_separatrix_lin(tau_n, Iapp):
+    saddle = find_saddle(tau_n, Iapp)
+    
     
     
 defaultclock.dt = 0.001*ms
@@ -265,9 +285,9 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 tau_n = .155*ms
-Iapp = 4* uA #/cm**2
-I_noise = 1*uA
-duration = 10000*ms
+Iapp = 2* uA #/cm**2
+I_noise = 3*uA
+duration = 1000*ms
 
 weight=.5 #after data is saved we can't change the weight anymore
 
@@ -283,9 +303,11 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
 
-#plot_everything(Cm, Iapp, duration, I_noise, weight, v0=-50*mV, n0=0)
+find_saddle(tau_n=tau_n, Iapp=Iapp)
+#plot_field(tau_n, Iapp)
+
 
 #thresh, node, cycle_boundary = set_thresh(Cm, Iapp, weight)
 #number=1000

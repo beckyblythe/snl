@@ -15,7 +15,7 @@
 -------------------------------------------------------------
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
-
+!-?mazbe to plot onlz quiet ISI and separatrix to see what's going on. Do not exactly node, but some area around it
 
 -Spykeviewer
 
