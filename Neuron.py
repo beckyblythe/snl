@@ -44,13 +44,14 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
 def find_points(tau_n, Iapp, v0=[-75,-65,-40, -65,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,-0]):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spikes, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=1000*ms, I_noise=0*uA)
+    Spikes, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=100*ms, I_noise=0*uA)
     node = max(V[0])
     cycle_boundary= min (V[-1])
+    saddle, sep_slope = find_sep_approx(tau_n, Iapp)
     
     file_name = str(tau_n)+'  '+str(Iapp)
     
-    plot_traces(t,V,n, node, cycle_boundary)
+    plot_traces(t,V,n, node, saddle, sep_slope, cycle_boundary)
     plt.savefig('points/'+file_name+'.png') 
     plt.show()
     
@@ -89,7 +90,8 @@ def set_thresh(tau_n, Iapp, weight=.5):
 def plot_everything(tau_n, Iapp, duration, I_noise, weight, number =1, v0=-30*mV, n0=-0):
     '''simulates neuron and plots all the available plots'''
     
-    thresh,node,cycle_boundary = set_thresh(tau_n, Iapp, weight)
+    saddle, sep_slope = find_sep_approx(tau_n, Iapp)
+    node, cycle_boundary = get_points(tau_n,Iapp) 
     
     file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise) + ' '+str(weight)
     print(file_name)
@@ -105,12 +107,13 @@ def plot_everything(tau_n, Iapp, duration, I_noise, weight, number =1, v0=-30*mV
         Spikes, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
         
                 
-        plot_traces(t,V,n,node, cycle_boundary)
+        plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
         plt.savefig('traces/'+file_name+'.png') 
         plt.show()
         
         V=V[-1]
-        ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up = collect_ISI_stats(t, V, Spikes, thresh, node)
+        n=n[-1]
+        ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up = collect_ISI_stats(t, V,n, Spikes, saddle, sep_slope, node)
         plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up) 
         if duration/ms >=10000:
             plt.savefig('histograms/'+file_name+'.png')
@@ -123,7 +126,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, weight, number =1, v0=-30*mV
             
    
   
-def plot_traces(t,V,n,node, cycle_boundary):
+def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
     plt.figure(figsize=(12, 8))
     plt.subplot2grid((2,2),(0,0), colspan=2)
@@ -146,13 +149,17 @@ def plot_traces(t,V,n,node, cycle_boundary):
     plt.axvline(x=cycle_boundary,linestyle = ':', color='c')
     plt.xlim((min(node-2*(cycle_boundary-node),cycle_boundary+2*(cycle_boundary-node)), 
               max(node-2*(cycle_boundary-node),cycle_boundary+2*(cycle_boundary-node))))
+    y = np.linspace(-.1,.5,50)
+    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+    plt.plot(x,y)
     plt.ylim((-.1,.5))
     
-def quiet_stats(t, V, Spikes, thresh,node):
+def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''Now we count as quiet ISIs where V reached the node value'''
     #array of booleans, length = length of t array
-    below_thresh = (V<=thresh) & (t>Spikes[0]) & (t < Spikes[-1])
-    below_node = (V<=node) & (t>Spikes[0]) & (t < Spikes[-1])
+    print(n)
+    below_sep = ((V-saddle[0])/sep_slope[0]-(n-saddle[1])/sep_slope[1]<=0) & (t>Spikes[0]) & (t < Spikes[-1])
+    below_node = (V<=node+.1*(saddle[0]-node)) & (t>Spikes[0]) & (t < Spikes[-1])
     #array of spikes indices, after which there is a quiet ISI
     quiet_ISI_indices = np.unique(np.searchsorted(Spikes, t[below_node]))-1
     #indices of t elements corresponding to Spike times
@@ -169,8 +176,8 @@ def quiet_stats(t, V, Spikes, thresh,node):
         Min_Volt[i] = np.min(V[Slice])
 #        print(np.nonzero(V[Slice]<=node))
         break_point[i]    = t[Slice[0]+np.min(np.nonzero(V[Slice]<=node))]  
-        Crossing_down[i] = t[Slice[0] + np.min(np.nonzero(below_thresh[Slice]))]
-        Crossing_up[i] = t[Slice[0] + np.max(np.nonzero(below_thresh[Slice]))]
+        Crossing_down[i] = t[Slice[0] + np.min(np.nonzero(below_sep[Slice]))]
+        Crossing_up[i] = t[Slice[0] + np.max(np.nonzero(below_sep[Slice]))]
     return quiet_ISI_indices, Min_Volt, break_point, Crossing_down, Crossing_up 
     
 def calculate_quiet_ISIs_partition(ISI_quiet, break_point, Crossing_down, Crossing_up):
@@ -180,8 +187,8 @@ def calculate_quiet_ISIs_partition(ISI_quiet, break_point, Crossing_down, Crossi
    
     return time_above, time_down, time_up
     
-def collect_ISI_stats(t, V, Spikes, thresh, node):
-    quiet_ISI_indices, Min_Volt, break_point, Crossing_down, Crossing_up = quiet_stats(t, V, Spikes, thresh, node)
+def collect_ISI_stats(t, V,n, Spikes, saddle, sep_slope, node):
+    quiet_ISI_indices, Min_Volt, break_point, Crossing_down, Crossing_up = quiet_stats(t, V, n, Spikes, saddle, sep_slope, node)
     ISI = calculate_ISI(Spikes)
     ISI_quiet = ISI[quiet_ISI_indices]
     ISI_burst = np.delete(ISI,quiet_ISI_indices)
@@ -254,21 +261,32 @@ def plot_field(tau_n, Iapp):
     
 def find_saddle(tau_n, Iapp):
     node, cycle_boundary=get_points(tau_n, Iapp)
-    v_grid ,n_grid = np.meshgrid(np.linspace(node+.05*(cycle_boundary-node),cycle_boundary,50), np.linspace(-0,.05,50))
-    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)-g_L*(v_grid*mV-E_L)+Iapp)/Cm)/mV*ms
+    v_grid ,n_grid = np.meshgrid(np.linspace(node+.05*(cycle_boundary-node),cycle_boundary,1000), np.linspace(-0,.05,1000))
+    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)-g_L*(v_grid-E_L/mV)+Iapp/mV)/Cm)*ms
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
     norm =  np.sqrt(np.square(dv_grid)+np.square(dn_grid))
     saddle = (v_grid[np.unravel_index(norm.argmin(), norm.shape)],n_grid[np.unravel_index(norm.argmin(), norm.shape)])
     print(saddle)
-    dv_grid= np.divide(dv_grid,norm)
-    dn_grid= np.divide(dn_grid,norm)
-    plt.figure()
-    plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+#    dv_grid= np.divide(dv_grid,norm)
+#    dn_grid= np.divide(dn_grid,norm)
+#    plt.figure()
+#    plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
     return(saddle)
     
-find_separatrix_lin(tau_n, Iapp):
+def find_sep_approx(tau_n, Iapp):
     saddle = find_saddle(tau_n, Iapp)
-    
+    a= (-g_Na*(1/np.square(1+exp((-20-saddle[0])/15.))*(1/15.*exp((-20-saddle[0])/15.))*(saddle[0]-E_Na/mV)+1/(1+exp((-20-saddle[0])/15.)))- g_K*saddle[1]-g_L)/Cm*ms
+                   
+    b= -g_K*(saddle[0]-E_K/mV)/Cm*ms
+    c= 1/np.square(1+exp((-25-saddle[0])/5.))*(1/5.*exp((-25-saddle[0])/5.))/tau_n*ms
+    d= -1/tau_n*ms
+   
+    J = np.array([[a,b],[c,d]])      
+    eigval, eigvec = np.linalg.eig(J)
+    print(eigval, eigvec)
+    sep_slope = eigvec[np.argmin(eigval)]
+    print(sep_slope)
+    return saddle, sep_slope
     
     
 defaultclock.dt = 0.001*ms
@@ -285,9 +303,9 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 tau_n = .155*ms
-Iapp = 2* uA #/cm**2
+Iapp = 3* uA #/cm**2
 I_noise = 3*uA
-duration = 1000*ms
+duration = 200*ms
 
 weight=.5 #after data is saved we can't change the weight anymore
 
@@ -304,8 +322,8 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
-
-find_saddle(tau_n=tau_n, Iapp=Iapp)
+find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,-0])
+#find_separatrix_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
 

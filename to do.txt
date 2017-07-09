@@ -15,6 +15,9 @@
 -------------------------------------------------------------
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
+-approx separatrix doesn't work!
+-dependency!!! saddle on get_points, but find_points on saddle
+
 !-?mazbe to plot onlz quiet ISI and separatrix to see what's going on. Do not exactly node, but some area around it
 
 -Spykeviewer
