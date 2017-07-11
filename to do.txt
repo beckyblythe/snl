@@ -11,11 +11,14 @@
 -J.-H. will give me a new 2D model. plot everything for it - see what happens!
 -Rewrite everything with tau_n as a parameter, maybe it's the problem!
  No, timestep was the prolem
+-approx separatrix doesn't work!
 
 -------------------------------------------------------------
+Plot limit cycle and node and saddle as points. Delete s in file names.
+
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
--approx separatrix doesn't work!
+
 -dependency!!! saddle on get_points, but find_points on saddle
 
 !-?mazbe to plot onlz quiet ISI and separatrix to see what's going on. Do not exactly node, but some area around it

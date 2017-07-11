@@ -93,13 +93,13 @@ def plot_everything(tau_n, Iapp, duration, I_noise, weight, number =1, v0=-30*mV
     saddle, sep_slope = find_sep_approx(tau_n, Iapp)
     node, cycle_boundary = get_points(tau_n,Iapp) 
     
-    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(int(duration/second))+' s  '+str(I_noise) + ' '+str(weight)
+    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration)+' s  '+str(I_noise) + ' '+str(weight)
     print(file_name)
     try:     
         data= get_simulation(file_name)
         print('Other plots are already generated. Find them in traces folder.')
         plot_histograms(node, **data)
-        if duration/ms >=50000:
+        if duration/ms >=1000:
             plt.savefig('histograms/'+file_name+'.png')
         plt.show()
         
@@ -134,12 +134,14 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.xlabel('time (s)')
     plt.ylabel('voltage (mV)')
     plt.plot(t, V.T) 
-#    plt.axhline(y=node, linestyle = ':',color = 'm')
+    plt.axhline(y=node, linestyle = ':',color = 'm')
     plt.subplot2grid((2,2),(1,0))
     plt.title('Trajectory in V-n plane')
     plt.xlabel('voltage (mV)')
     plt.ylabel('n')
     plt.plot(V.T,n.T)
+    plt.axvline(x=node, linestyle = ':', color='m')
+    plt.axvline(x=cycle_boundary,linestyle = ':', color='c')
     y = np.linspace(-.1,.5,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     plt.plot(x,y)
@@ -155,7 +157,7 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     y = np.linspace(-.1,.5,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     plt.plot(x,y)
-    plt.ylim((-.1,.5))
+    plt.ylim((-.1,.1))
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''Now we count as quiet ISIs where V reached the node value'''
@@ -177,10 +179,12 @@ def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
         #array of t indices within each quiet ISI
         Slice=np.arange(spike_times_indices[quiet_ISI_indices[i]],spike_times_indices[quiet_ISI_indices[i]+1])
         Min_Volt[i] = np.min(V[Slice])
-#        print(np.nonzero(V[Slice]<=node))
-        break_point[i]    = t[Slice[0]+np.min(np.nonzero(V[Slice]<=node))]  
-        Crossing_down[i] = t[Slice[0] + np.min(np.nonzero(below_sep[Slice]))]
-        Crossing_up[i] = t[Slice[0] + np.max(np.nonzero(below_sep[Slice]))]
+        break_point_idx = Slice[0]+np.min(np.nonzero(V[Slice]<=node))
+        break_point[i]    = t[break_point_idx]  
+        Crossing_down[i] = t[Slice[0] + 
+                           np.min(np.nonzero(below_sep[spike_times_indices[quiet_ISI_indices[i]]:break_point_idx]))]
+        Crossing_up[i] = t[break_point_idx+ 
+                         np.min(np.nonzero(np.logical_not(below_sep[break_point_idx:spike_times_indices[quiet_ISI_indices[i]+1]])))]
     return quiet_ISI_indices, Min_Volt, break_point, Crossing_down, Crossing_up 
     
 def calculate_quiet_ISIs_partition(ISI_quiet, break_point, Crossing_down, Crossing_up):
@@ -268,8 +272,8 @@ def find_saddle(tau_n, Iapp):
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)-g_L*(v_grid-E_L/mV)+Iapp/mV)/Cm)*ms
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
     norm =  np.sqrt(np.square(dv_grid)+np.square(dn_grid))
-    saddle = (v_grid[np.unravel_index(norm.argmin(), norm.shape)],n_grid[np.unravel_index(norm.argmin(), norm.shape)])
-    print(saddle)
+    saddle = [v_grid[np.unravel_index(norm.argmin(), norm.shape)],n_grid[np.unravel_index(norm.argmin(), norm.shape)]]
+    
 #    dv_grid= np.divide(dv_grid,norm)
 #    dn_grid= np.divide(dn_grid,norm)
 #    plt.figure()
@@ -278,18 +282,15 @@ def find_saddle(tau_n, Iapp):
     
 def find_sep_approx(tau_n, Iapp):
     saddle = find_saddle(tau_n, Iapp)
-    a= 1/Cm*(-g_Na*(1000/15*exp((-20-saddle[0])/15)*(1+exp((-20-saddle[0])/15))**(-2)*(saddle[0]/1000-E_Na/volt)+(1+exp((-20-saddle[0])/15))**(-1))- g_K*saddle[1]-g_L)*second
-    b= -1/Cm*g_K*(saddle[0]/1000-E_K/volt)*second
-    c= 1/tau_n*1000/5*exp((-25-saddle[0])/5)*(1+exp((-25-saddle[0])/5))**(-2)*second
-    d= -1/tau_n*second
+    a= 1/Cm*(-g_Na*(1000/15*exp((-20-saddle[0])/15)*(1+exp((-20-saddle[0])/15))**(-2)*(saddle[0]/1000-E_Na/volt)+
+                    (1+exp((-20-saddle[0])/15))**(-1))- g_K*saddle[1]-g_L)*ms
+    b= -1/Cm*g_K*(saddle[0]/1000-E_K/volt)*ms*1000
+    c= 1/tau_n*1000/5*exp((-25-saddle[0])/5)*(1+exp((-25-saddle[0])/5))**(-2)*ms/1000
+    d= -1/tau_n*ms
    
     J = np.array([[a,b],[c,d]])    
-    print(J)
     eigval, eigvec = np.linalg.eig(J)
-    print(eigval, eigvec)
-    sep_slope = eigvec[np.argmin(eigval)]
-    sep_slope[0]*=1000
-    print(sep_slope)
+    sep_slope = eigvec[:,argmin(eigval)]
   
     return saddle, sep_slope
     
@@ -307,10 +308,10 @@ E_K = -90 * mV
 
 tau = 1.0*ms
 
-tau_n = .165*ms
-Iapp = 4.51* uA #/cm**2
-I_noise = 3*uA
-duration = 200*ms
+tau_n = .155*ms
+Iapp = 2* uA #/cm**2
+I_noise = 2.5*uA
+duration = 300*ms
 
 weight=.5 #after data is saved we can't change the weight anymore
 
@@ -326,9 +327,9 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
-find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62.1,-60,-50]*mV,n0=[.05,.05,-.03, -.1,-.1,-0])
-#find_separatrix_approx(tau_n=tau_n, Iapp=Iapp)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
+#find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62.1,-60,-50]*mV,n0=[.05,.05,-.03, -.1,-.1,-0])
+#find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
 
