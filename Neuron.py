@@ -140,6 +140,9 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.xlabel('voltage (mV)')
     plt.ylabel('n')
     plt.plot(V.T,n.T)
+    y = np.linspace(-.1,.5,50)
+    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+    plt.plot(x,y)
     plt.subplot2grid((2,2),(1,1))
     plt.title('Trajectory in V-n plane (zoomed)')
     plt.xlabel('voltage (mV)')
@@ -275,17 +278,19 @@ def find_saddle(tau_n, Iapp):
     
 def find_sep_approx(tau_n, Iapp):
     saddle = find_saddle(tau_n, Iapp)
-    a= (-g_Na*(1/np.square(1+exp((-20-saddle[0])/15.))*(1/15.*exp((-20-saddle[0])/15.))*(saddle[0]-E_Na/mV)+1/(1+exp((-20-saddle[0])/15.)))- g_K*saddle[1]-g_L)/Cm*ms
-                   
-    b= -g_K*(saddle[0]-E_K/mV)/Cm*ms
-    c= 1/np.square(1+exp((-25-saddle[0])/5.))*(1/5.*exp((-25-saddle[0])/5.))/tau_n*ms
-    d= -1/tau_n*ms
+    a= 1/Cm*(-g_Na*(1000/15*exp((-20-saddle[0])/15)*(1+exp((-20-saddle[0])/15))**(-2)*(saddle[0]/1000-E_Na/volt)+(1+exp((-20-saddle[0])/15))**(-1))- g_K*saddle[1]-g_L)*second
+    b= -1/Cm*g_K*(saddle[0]/1000-E_K/volt)*second
+    c= 1/tau_n*1000/5*exp((-25-saddle[0])/5)*(1+exp((-25-saddle[0])/5))**(-2)*second
+    d= -1/tau_n*second
    
-    J = np.array([[a,b],[c,d]])      
+    J = np.array([[a,b],[c,d]])    
+    print(J)
     eigval, eigvec = np.linalg.eig(J)
     print(eigval, eigvec)
     sep_slope = eigvec[np.argmin(eigval)]
+    sep_slope[0]*=1000
     print(sep_slope)
+  
     return saddle, sep_slope
     
     
@@ -302,8 +307,8 @@ E_K = -90 * mV
 
 tau = 1.0*ms
 
-tau_n = .155*ms
-Iapp = 3* uA #/cm**2
+tau_n = .165*ms
+Iapp = 4.51* uA #/cm**2
 I_noise = 3*uA
 duration = 200*ms
 
@@ -322,7 +327,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, weight=weight, number =1, v0=-30*mV, n0=-0)
-find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,-0])
+find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62.1,-60,-50]*mV,n0=[.05,.05,-.03, -.1,-.1,-0])
 #find_separatrix_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
