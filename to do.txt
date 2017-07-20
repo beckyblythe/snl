@@ -15,9 +15,7 @@
 -Plot limit cycle and node and saddle as points.
 --dependency!!! saddle on get_points, but find_points on saddle
 Do not exactly node, but some area around it
-
 -------------------------------------------------------------
- Delete s in file names.
 
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
@@ -25,7 +23,7 @@ Do not exactly node, but some area around it
 
 -Spykeviewer
 
--to think what tau value for noise is reasonable. noise current mean could be bigger then what I'm using
+-to think what tau value for noise is reasonable. noise current mean could be bigger than what I'm using
 
 
 

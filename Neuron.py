@@ -84,7 +84,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
     '''simulates neuron and plots all the available plots'''
     node, saddle, sep_slope, cycle_boundary = get_points(tau_n,Iapp) 
         
-    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration)+' s  '+str(I_noise) + ' '
+    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise) + ' '
     print(file_name)
     try:     
         data= get_simulation(file_name)
@@ -167,7 +167,7 @@ def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
         #array of t indices within each quiet ISI
         Slice=np.arange(spike_times_indices[quiet_ISI_indices[i]],spike_times_indices[quiet_ISI_indices[i]+1])
         Min_Volt[i]     = np.min(V[Slice])
-        break_point_idx = Slice[0]+np.min(np.nonzero(V[Slice]<=node[0]))
+        break_point_idx = Slice[0]+np.min(np.nonzero(V[Slice]<=node[0]+.1*(saddle[0]-node[0])))
         break_point[i]  = t[break_point_idx]  
         Crossing_down[i]= t[Slice[0] + 
                            np.min(np.nonzero(below_sep[spike_times_indices[quiet_ISI_indices[i]]:break_point_idx]))]
@@ -278,10 +278,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .155*ms
-Iapp = 2* uA #/cm**2
-I_noise = 2.5*uA
-duration = 1000*ms
+tau_n = .165*ms
+Iapp = 4.51* uA #/cm**2
+I_noise = 1*uA
+duration = 50000*ms
 
 
 
