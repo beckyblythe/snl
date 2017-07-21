@@ -2,6 +2,7 @@ from brian2 import *
 import numpy as np
 import pickle
 from collections import OrderedDict
+from gif_plotting import plot_animated
 
 
 class Object(object):
@@ -115,6 +116,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
+    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
+    
     plt.figure(figsize=(12, 8))
     plt.subplot2grid((2,2),(0,0), colspan=2)
     plt.title('Voltage trace')
@@ -170,9 +173,9 @@ def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
         break_point_idx = Slice[0]+np.min(np.nonzero(V[Slice]<=node[0]+.1*(saddle[0]-node[0])))
         break_point[i]  = t[break_point_idx]  
         Crossing_down[i]= t[Slice[0] + 
-                           np.min(np.nonzero(below_sep[spike_times_indices[quiet_ISI_indices[i]]:break_point_idx]))]
+                           np.max(np.nonzero(np.logical_not(below_sep[spike_times_indices[quiet_ISI_indices[i]]:break_point_idx])))]
         Crossing_up[i] = t[break_point_idx+ 
-                         np.min(np.nonzero(np.logical_not(below_sep[break_point_idx:spike_times_indices[quiet_ISI_indices[i]+1]])))]
+                         np.max(np.nonzero((below_sep[break_point_idx:spike_times_indices[quiet_ISI_indices[i]+1]])))]
     return quiet_ISI_indices, Min_Volt, break_point, Crossing_down, Crossing_up 
     
 def calculate_quiet_ISIs_partition(ISI_quiet, break_point, Crossing_down, Crossing_up):
@@ -278,10 +281,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .165*ms
-Iapp = 4.51* uA #/cm**2
-I_noise = 1*uA
-duration = 50000*ms
+tau_n = .153*ms
+Iapp = 1* uA #/cm**2
+I_noise = 3*uA
+duration = 10000*ms
 
 
 
