@@ -42,7 +42,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -65,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,-0], plot = True):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.05], plot = True):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spikes, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=100*ms, 
@@ -116,7 +116,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
-    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
+#    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
     
     plt.figure(figsize=(12, 8))
     plt.subplot2grid((2,2),(0,0), colspan=2)
@@ -282,9 +282,9 @@ tau = 1.0*ms
 
 #parameters to play with
 tau_n = .153*ms
-Iapp = 1* uA #/cm**2
-I_noise = 3*uA
-duration = 10000*ms
+Iapp = 3* uA #/cm**2
+I_noise = 2*uA
+duration = 50000*ms
 
 
 
