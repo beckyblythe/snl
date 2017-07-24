@@ -109,7 +109,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
         with open('simulations/'+file_name, 'wb') as f:
             pickle.dump(data_generated, f)   
             
-    if duration/ms >=1000:
+    if duration/ms >1000:
         plt.savefig('histograms/'+file_name+'.png')
     plt.show()
    
@@ -205,18 +205,19 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
     '''plots histogram for all ISIs, classified ISIs, and quiet ISIs segments'''
     
     plt.figure(figsize = (12,8))
-    intervals = OrderedDict([('ISIs',ISI), ('Quiet_ISIs',ISI_quiet), ('Burst_ISIs',ISI_burst), 
-                             ('Time_above',time_above), ('Time_down',time_down), ('Time_up',time_up)])
+    intervals = OrderedDict([('ISIs',ISI), ('Burst_ISIs',ISI_burst), ('Quiet_ISIs',ISI_quiet), 
+                             ('Time_down',time_down),('Time_above',time_above), ('Time_up',time_up)])
     i=1
     for key in intervals:
-        intervals[key] *= 1000 #----->ms
+        intervals[key] 
         plt.subplot(2,3,i)
         plt.title(str(intervals[key].shape[0])+ ' ' + str(key))
         plt.xlabel('time (ms)')
         plt.ylabel('Distribution of times')
-    #    plt.xlim((0,5))
-        plt.hist(intervals[key], normed = True)
-        plt.axvline(intervals[key].mean(), color = 'r')
+        plt.hist(intervals[key]*1000, normed = True)
+        plt.axvline(intervals[key].mean()*1000, color = 'r')
+        if key in ['Burst_ISIs', 'Time_down', 'Time_above']:
+            plt.xlim((0,10))
         i +=1       
 
     plt.tight_layout()  
@@ -282,8 +283,8 @@ tau = 1.0*ms
 
 #parameters to play with
 tau_n = .153*ms
-Iapp = 3* uA #/cm**2
-I_noise = 2*uA
+Iapp = 2* uA #/cm**2
+I_noise = 2.5*uA
 duration = 50000*ms
 
 
