@@ -42,7 +42,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spikes, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.05], plot = True):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-40]*mV,n0=[.05,.05,-.1, -.1,-.1,.05], plot = True):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spikes, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=100*ms, 
@@ -204,20 +204,25 @@ def calculate_ISI(Spikes):
 def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_down, time_up):
     '''plots histogram for all ISIs, classified ISIs, and quiet ISIs segments'''
     
-    plt.figure(figsize = (12,8))
+    fig = plt.figure(figsize = (12,8))
     intervals = OrderedDict([('ISIs',ISI), ('Burst_ISIs',ISI_burst), ('Quiet_ISIs',ISI_quiet), 
                              ('Time_down',time_down),('Time_above',time_above), ('Time_up',time_up)])
+    print(np.mean(time_down)/np.mean(ISI_quiet))
     i=1
     for key in intervals:
         intervals[key] 
-        plt.subplot(2,3,i)
-        plt.title(str(intervals[key].shape[0])+ ' ' + str(key))
-        plt.xlabel('time (ms)')
-        plt.ylabel('Distribution of times')
-        plt.hist(intervals[key]*1000, normed = True)
-        plt.axvline(intervals[key].mean()*1000, color = 'r')
-        if key in ['Burst_ISIs', 'Time_down', 'Time_above']:
-            plt.xlim((0,10))
+        ax = fig.add_subplot(2,3,i)
+        ax.set_title(str(intervals[key].shape[0])+ ' ' + str(key))
+        ax.set_xlabel('time (ms)')
+        ax.set_ylabel('Distribution of times')
+        ax.hist(intervals[key]*1000, normed = True)
+        ax.axvline(intervals[key].mean()*1000, color = 'r')
+        if key == 'ISIs': 
+            xmin,xmax = ax.get_xlim()
+        elif key in ['Burst_ISIs', 'Time_down', 'Time_above']:
+            ax.set_xlim((0,10))
+        else:
+            ax.set_xlim=((xmin,xmax))
         i +=1       
 
     plt.tight_layout()  
@@ -282,7 +287,7 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .153*ms
+tau_n = .150*ms
 Iapp = 2* uA #/cm**2
 I_noise = 2.5*uA
 duration = 50000*ms

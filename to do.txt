@@ -19,7 +19,7 @@ Do not exactly node, but some area around it
 
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
 
--to check change of units for time. We change it at some pount before saving it seems
+-1000 multiplication for histograms. somehow needed for 153 1, check why. fix
 
 !-?mazbe to plot onlz quiet ISI and separatrix to see what's going on. 
 
