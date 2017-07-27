@@ -287,10 +287,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .150*ms
-Iapp = 2* uA #/cm**2
+tau_n = .159*ms
+Iapp = 3* uA #/cm**2
 I_noise = 2.5*uA
-duration = 50000*ms
+duration = 10000*ms
 
 
 
@@ -306,9 +306,9 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =1, v0=-30*mV, n0=-0)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =1, v0=-30*mV, n0=-0)
 
-#find_points(tau_n=tau_n, Iapp=Iapp, v0=[-75,-65,-40, -62.1,-60,-50]*mV,n0=[.05,.05,-.03, -.1,-.1,-0])
+find_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
