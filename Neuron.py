@@ -2,7 +2,7 @@ from brian2 import *
 import numpy as np
 import pickle
 from collections import OrderedDict
-from gif_plotting import plot_animated
+#from gif_plotting import plot_animated
 
 
 class Object(object):
@@ -308,7 +308,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =1, v0=-30*mV, n0=-0)
 
-find_points(tau_n=tau_n, Iapp=Iapp)
+#find_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
