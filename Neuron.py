@@ -215,9 +215,10 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
         ax.set_title(str(intervals[key].shape[0])+ ' ' + str(key))
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
-        ax.hist(intervals[key]*1000, normed = True)
+        ax.hist(intervals[key]*1000, normed = False, bins = 100)
         ax.axvline(intervals[key].mean()*1000, color = 'r')
         if key == 'ISIs': 
+#            ax.set_xlim((0,10))
             xmin,xmax = ax.get_xlim()
         elif key in ['Burst_ISIs', 'Time_down', 'Time_above']:
             ax.set_xlim((0,10))
@@ -287,10 +288,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .150*ms
-Iapp = 2* uA #/cm**2
+tau_n = .167*ms
+Iapp = 4.5* uA #/cm**2
 I_noise = 2.5*uA
-duration = 1000*ms
+duration = 10000*ms
 
 
 

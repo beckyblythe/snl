@@ -16,9 +16,9 @@
 --dependency!!! saddle on get_points, but find_points on saddle
 Do not exactly node, but some area around it
 -Simulate more data. Think about ISI division. Talk to J.-H. on monday
--------------------------------------------------------------
-
 -to plot fraction of quiet as a function of tau, I. Maybe even distribution of burst in a row.
+-------------------------------------------------------------
+-try to find parameters, so that overall distribution looks bimodal!
 
 -1000 multiplication for histograms. somehow needed for 153 1, check why. fix
 
