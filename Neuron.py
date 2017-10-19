@@ -57,8 +57,8 @@ def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-40]*mV,n0=[.05,.05,-.1, -
         plot_traces(t,V,n, node, saddle, sep_slope, cycle_boundary)
         plt.savefig('points/'+file_name+'.png') 
         plt.show()
-    if node[0] >= cycle_boundary[0]:
-        raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
+#    if node[0] >= cycle_boundary[0]:
+#        raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
 
     return node, saddle, sep_slope, cycle_boundary
     
@@ -218,7 +218,7 @@ def plot_histograms(node, ISI, ISI_quiet, ISI_burst, Min_Volt, time_above, time_
         ax.hist(intervals[key]*1000, normed = False, bins = 100)
         ax.axvline(intervals[key].mean()*1000, color = 'r')
         if key == 'ISIs': 
-#            ax.set_xlim((0,10))
+            ax.set_xlim((0,50))
             xmin,xmax = ax.get_xlim()
         elif key in ['Burst_ISIs', 'Time_down', 'Time_above']:
             ax.set_xlim((0,10))
@@ -274,7 +274,7 @@ def find_sep_approx(tau_n, Iapp, saddle):
     return sep_slope
     
     
-defaultclock.dt = 0.001*ms
+defaultclock.dt = 0.00005*ms
 
 
 Cm = 1 * uF #/cm2
@@ -288,9 +288,9 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .167*ms
-Iapp = 4.5* uA #/cm**2
-I_noise = 2.5*uA
+tau_n = .1575*ms
+Iapp = 2.3* uA #/cm**2
+I_noise = 2*uA
 duration = 10000*ms
 
 
@@ -307,9 +307,12 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 
+#Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
+#ISIs = calculate_ISI(Spikes)
+#plt.hist(ISIs, bins = 100)
 plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =1, v0=-30*mV, n0=-0)
 
-#find_points(tau_n=tau_n, Iapp=Iapp)
+#get_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp)
 
