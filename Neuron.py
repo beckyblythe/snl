@@ -12,6 +12,8 @@ class Object(object):
 plt.rcParams['figure.figsize'] = 6, 6
 plt.rcParams['agg.path.chunksize'] = 10000
 
+matplotlib.use('Agg')
+
 
 
 def get_simulation(file_name):
@@ -57,6 +59,7 @@ def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-40]*mV,n0=[.05,.05,-.1, -
     if plot:
         plot_traces(t,V,n, node, saddle, sep_slope, cycle_boundary)
         plt.savefig('points/'+file_name+'.png') 
+        plt.close()
 #        plt.show()
 #    if node[0] >= cycle_boundary[0]:
 #        raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
@@ -114,12 +117,14 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
         
         plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
         plt.savefig('traces/'+file_name+'.png') 
+        plt.close()
 #        plt.show()
         
     plot_histograms(results) 
 #        
     if duration/ms >1000:
         plt.savefig('histograms/'+file_name+'.png')
+    plt.close()
 #    plt.show()
    
   
@@ -260,6 +265,7 @@ def plot_field(tau_n, Iapp):
     
     plt.figure()
     plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+    plt.close()
 #    plt.show()
     
 def find_saddle(tau_n, Iapp, node, cycle_boundary):
@@ -293,7 +299,7 @@ def find_sep_approx(tau_n, Iapp, saddle):
     return sep_slope
     
     
-defaultclock.dt = 0.00005*ms
+defaultclock.dt = 0.001*ms
 
 
 Cm = 1 * uF #/cm2
