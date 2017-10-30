@@ -12,9 +12,6 @@ class Object(object):
 plt.rcParams['figure.figsize'] = 6, 6
 plt.rcParams['agg.path.chunksize'] = 10000
 
-matplotlib.use('Agg')
-
-
 
 def get_simulation(file_name):
     '''reads simulation results from file or runs simulation'''
@@ -45,7 +42,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spike_t, Spike_i, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-40]*mV,n0=[.05,.05,-.1, -.1,-.1,.05], plot = True):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-40]*mV,n0=[.05,.05,-.1, -.1,-.1,.05], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=100*ms, 
@@ -85,7 +82,7 @@ def get_points(tau_n, Iapp):
             
     return node, saddle, sep_slope, cycle_boundary
            
-def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0):
+def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0, plot = False):
     '''simulates neuron and plots all the available plots'''
     node, saddle, sep_slope, cycle_boundary = get_points(tau_n,Iapp) 
         
@@ -115,17 +112,19 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0)
         with open('simulations/'+file_name, 'wb') as f:
             pickle.dump(results, f) 
         
-        plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-        plt.savefig('traces/'+file_name+'.png') 
+        if plot:
+            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
+            plt.savefig('traces/'+file_name+'.png') 
+            plt.close()
+            plt.show()
+     
+    if plot:
+        plot_histograms(results) 
+            
+        if duration/ms >1000:
+            plt.savefig('histograms/'+file_name+'.png')
         plt.close()
-#        plt.show()
-        
-    plot_histograms(results) 
-#        
-    if duration/ms >1000:
-        plt.savefig('histograms/'+file_name+'.png')
-    plt.close()
-#    plt.show()
+        plt.show()
    
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
@@ -252,7 +251,7 @@ def plot_histograms(results):
 
     plt.tight_layout()  
     
-def plot_field(tau_n, Iapp):
+def plot_field(tau_n, Iapp, plot = False):
     '''Plots phase plane for given parameters'''
     v_grid ,n_grid = np.meshgrid(np.linspace(-70,-50,100), np.linspace(-0,.05,50))
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid*mV-E_Na)-g_K*n_grid*(v_grid*mV-E_K)
@@ -263,10 +262,11 @@ def plot_field(tau_n, Iapp):
     dv_grid= np.divide(dv_grid,norm)
     dn_grid= np.divide(dn_grid,norm)
     
-    plt.figure()
-    plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
-    plt.close()
-#    plt.show()
+    if plot:
+        plt.figure()
+        plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+        plt.close()
+    #    plt.show()
     
 def find_saddle(tau_n, Iapp, node, cycle_boundary):
     '''Finds saddle location given parameters'''
