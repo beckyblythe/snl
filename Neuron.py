@@ -123,7 +123,6 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
             
         if duration/ms >1000:
             plt.savefig('histograms/'+file_name+'.png')
-        plt.close()
         plt.show()
    
   
@@ -299,7 +298,7 @@ def find_sep_approx(tau_n, Iapp, saddle):
     return sep_slope
     
     
-defaultclock.dt = 0.001*ms
+defaultclock.dt = 0.00005*ms
 
 
 Cm = 1 * uF #/cm2
@@ -335,7 +334,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-a = plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = False)
 
 #get_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
