@@ -24,7 +24,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation    
     print(tau_n, Iapp)
-    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.03*volt', refractory = 'v > -.03*volt')
+    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.02*volt', refractory = 'v > -.02*volt')
     neuron.v = v0 
     neuron.n = n0
         
@@ -237,7 +237,10 @@ def plot_histograms(results):
         ax.set_title(str(flat_intervals.shape[0])+ ' ' + str(key))
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
-        ax.hist(flat_intervals*1000, normed = False, bins = 100)
+        if key == 'ISI':
+            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 500)
+        else:
+            ax.hist(flat_intervals*1000, normed = False, bins = 100)
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
         if key == 'ISI': 
             ax.set_xlim((0,50))
@@ -312,10 +315,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .1625*ms
-Iapp = 3.9* uA #/cm**2
-I_noise = 1.5*uA
-duration = 10000*ms
+tau_n = .160*ms
+Iapp = 3.2* uA #/cm**2
+I_noise = 2*uA
+duration = 500*ms
 
 
 
@@ -334,7 +337,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = False)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = True)
 
 #get_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
