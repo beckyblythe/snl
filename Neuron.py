@@ -316,9 +316,9 @@ tau = 1.0*ms
 
 #parameters to play with
 tau_n = .160*ms
-Iapp = 3.2* uA #/cm**2
+Iapp = 3.9* uA #/cm**2
 I_noise = 2*uA
-duration = 500*ms
+duration = 10000*ms
 
 
 
@@ -337,7 +337,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = False)
 
 #get_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
