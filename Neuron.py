@@ -24,7 +24,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation    
     print(tau_n, Iapp)
-    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.02*volt', refractory = 'v > -.02*volt')
+    neuron = NeuronGroup(number, eqs,  threshold = 'v >-.02*volt', refractory = 'v > -.03*volt')
     neuron.v = v0 
     neuron.n = n0
         
@@ -315,8 +315,8 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .160*ms
-Iapp = 3.9* uA #/cm**2
+tau_n = .155*ms
+Iapp = 1.2* uA #/cm**2
 I_noise = 2*uA
 duration = 10000*ms
 
