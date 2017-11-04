@@ -238,7 +238,7 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 500)
+            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = range(0,50,1))
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 100)
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
@@ -315,8 +315,8 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .155*ms
-Iapp = 1.2* uA #/cm**2
+tau_n = .1625*ms
+Iapp = 3.9* uA #/cm**2
 I_noise = 2*uA
 duration = 10000*ms
 
@@ -337,7 +337,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = False)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-30*mV, n0=.05, plot = True)
 
 #get_points(tau_n=tau_n, Iapp=Iapp)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
