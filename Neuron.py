@@ -315,9 +315,9 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .155*ms
-Iapp = 1.2* uA #/cm**2
-I_noise = 2*uA
+tau_n = .1625*ms
+Iapp = 3.9* uA #/cm**2
+I_noise = 2.5*uA
 duration = 10000*ms
 
 
