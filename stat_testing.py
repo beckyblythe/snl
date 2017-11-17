@@ -11,9 +11,9 @@ def inverse_gauss(x):
 
     
 
-tau_n = .155*ms
-Iapp = 3.9* uA #/cm**2
-I_noise = 2*uA
+tau_n = .1575*ms
+Iapp = 3.2* uA #/cm**2
+I_noise = 2.5*uA
 duration = 10000*ms
 
 v0=-30*mV
@@ -28,13 +28,13 @@ ISI = np.array([interval for neuron in results['ISI'] for interval in neuron])*1
 
 mu = np.mean(ISI)
 Lambda = np.mean(1/(1/ISI - 1/mu))
-
-print(stats.kstest(ISI, inverse_gauss))
-
-plt.figure()
-plt.hist(ISI, bins = 1000, normed = True)
-x=np.arange(0,20,.05)
-plt.plot(x, inverse_gauss(x))
-plt.axvline(mu)
-plt.xlim((0,20))
-plt.show()
+#
+#print(stats.kstest(ISI, inverse_gauss))
+#
+#plt.figure()
+#plt.hist(ISI, bins = 1000, normed = True)
+#x=np.arange(0,20,.05)
+#plt.plot(x, inverse_gauss(x))
+#plt.axvline(mu)
+#plt.xlim((0,20))
+#plt.show()
