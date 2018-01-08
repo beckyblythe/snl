@@ -31,6 +31,8 @@ Do not exactly node, but some area around it
 -Compare properly new results to old results
 -Running simulations now with noise 2.5. maybe we can actually see proper bimodal stuff
 
+-maybe fix the plotting. now it's really not obvious when and what is plotted!
+
 
 
 
