@@ -258,18 +258,19 @@ def plot_histograms(results):
     
 def plot_field(tau_n, Iapp, plot = False):
     '''Plots phase plane for given parameters'''
-    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,20), np.linspace(-0,.7,20))
+    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,15), np.linspace(-0,.7,15))
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)
-                -g_L*(v_grid-E_L/mV)+Iapp/mV/1000)/Cm)*ms/1000
-    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms
+                -g_L*(v_grid-E_L/mV)+Iapp/mV/1000)/Cm)*ms/70
+    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms/.75
     #Normalization to have all vectors of the same length (otherwise the small ones are too small)
-    norm = 5# np.sqrt(np.square(dv_grid)+np.square(dn_grid))
-#    dv_grid= np.divide(dv_grid+.1,norm)
-#    dn_grid= np.divide(dn_grid+.1,norm)
+    norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+#    print(dv_grid)
+    dv_grid += 2*dv_grid/norm
+    dn_grid += 2*dn_grid/norm
     
     if plot:
 #        plt.figure()
-        plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .0015)
+        plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .002)
 #        plt.close()
 #        plt.show()
     
@@ -319,7 +320,7 @@ tau = 1.0*ms
 
 #parameters to play with
 tau_n = .155*ms
-Iapp = 1.2* uA #/cm**2
+Iapp = 4* uA #/cm**2
 I_noise = 2.5*uA
 duration = 2.5*ms
 
