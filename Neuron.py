@@ -42,7 +42,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spike_t, Spike_i, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,0.02], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.01], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=20*ms, 
@@ -130,41 +130,53 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
 #    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
     
-    plt.figure(figsize=(12, 8))
-    plt.subplot2grid((2,2),(0,0), colspan=2)
-    plt.title('Voltage trace')
-    plt.xlabel('time (s)')
-    plt.ylabel('voltage (mV)')
-    plt.plot(t, V.T) 
-    plt.axhline(y = node[0],color='0', linestyle ='--')
-    plt.axhline(y = saddle[0],color='0', linestyle ='--')
-    plt.subplot2grid((2,2),(1,0))
-    plt.title('Trajectory in V-n plane')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
-    plt.plot(V.T,n.T)
-    plt.plot(node[0], node[1],marker='o', color='0')
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+    plt.figure(figsize=(5, 5))
+    
+    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 1)
+    plt.plot(node[0], node[1],marker='o', color='0', ms = 5)
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=5)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+    print(saddle, x[5:15], y[5:15])
     plt.plot(saddle[0], saddle[1], color = '0')
-    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
     plt.ylim((-.05,.7))
-    plot_field(tau_n, Iapp, plot = True)
-    plt.subplot2grid((2,2),(1,1))
-    plt.title('Trajectory in V-n plane (zoomed)')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
-    plt.plot(V.T,n.T)
-    plt.plot(node[0], node[1],marker='o', color='r')
-    plt.plot(saddle[0], saddle[1], marker = 'D', color = '0')
-    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
-              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
-    y = np.linspace(-.05,.5,50)
-    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    plt.plot(x,y, color = 'b', linestyle = '--', linewidth = 5)
-    plt.ylim((-.05,.65))
+    
+#    plt.subplot2grid((2,2),(0,0), colspan=2)
+#    plt.title('Voltage trace')
+#    plt.xlabel('time (s)')
+#    plt.ylabel('voltage (mV)')
+#    plt.plot(t, V.T) 
+#    plt.axhline(y = node[0],color='0', linestyle ='--')
+#    plt.axhline(y = saddle[0],color='0', linestyle ='--')
+#    plt.subplot2grid((2,2),(1,0))
+#    plt.title('Trajectory in V-n plane')
+#    plt.xlabel('voltage (mV)')
+#    plt.ylabel('n')
+#    plt.plot(V.T,n.T, color = '#4B0082')
+#    plt.plot(node[0], node[1],marker='o', color='0')
+#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+#    y = np.linspace(-.1,.7,50)
+#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+#    plt.plot(saddle[0], saddle[1], color = '0')
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+#    plt.xlim((-70,0))
+#    plt.ylim((-.05,.7))
+##    plot_field(tau_n, Iapp, plot = True)
+#    plt.subplot2grid((2,2),(1,1))
+#    plt.title('Trajectory in V-n plane (zoomed)')
+#    plt.xlabel('voltage (mV)')
+#    plt.ylabel('n')
+#    plt.plot(V.T,n.T)
+#    plt.plot(node[0], node[1],marker='o', color='r')
+#    plt.plot(saddle[0], saddle[1], marker = 'D', color = '0')
+#    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
+#              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
+#    y = np.linspace(-.05,.5,50)
+#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+#    plt.plot(x,y, color = 'b', linestyle = '--', linewidth = 5)
+#    plt.ylim((-.05,.65))
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''We count as quiet ISIs when V reached the neighbourhhod of the node'''
@@ -258,7 +270,7 @@ def plot_histograms(results):
     
 def plot_field(tau_n, Iapp, plot = False):
     '''Plots phase plane for given parameters'''
-    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,15), np.linspace(-0,.7,15))
+    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,8), np.linspace(-0,.7,8))
     dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)
                 -g_L*(v_grid-E_L/mV)+Iapp/mV/1000)/Cm)*ms/70
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms/.75
@@ -320,7 +332,7 @@ tau = 1.0*ms
 
 #parameters to play with
 tau_n = .155*ms
-Iapp = 4* uA #/cm**2
+Iapp = 3.9* uA #/cm**2
 I_noise = 2.5*uA
 duration = 2.5*ms
 
@@ -343,4 +355,4 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 
 find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
-plot_field(tau_n, Iapp, plot = True)
+#plot_field(tau_n, Iapp, plot = True)

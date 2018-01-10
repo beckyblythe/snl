@@ -33,6 +33,8 @@ Do not exactly node, but some area around it
 
 -maybe fix the plotting. now it's really not obvious when and what is plotted!
 
+-phase portrait. something is still wrong. arrows don't go to the limit cycle
+
 
 
 
