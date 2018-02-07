@@ -110,8 +110,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
             for key in keys:
                 results[key].append(result_i[key]) 
         
-        with open('simulations/'+file_name, 'wb') as f:
-            pickle.dump(results, f) 
+#        with open('simulations/'+file_name, 'wb') as f:
+#            pickle.dump(results, f) 
         
         if plot:
             plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
@@ -120,12 +120,12 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
             plt.close()
             
      
-    if plot:
-        plot_histograms(results) 
-            
-        if duration/ms >1000:
-            plt.savefig('histograms/'+file_name+'.png')
-        plt.show()
+#    if plot:
+#        plot_histograms(results) 
+#            
+#        if duration/ms >1000:
+#            plt.savefig('histograms/'+file_name+'.png')
+#        plt.show()
    
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
@@ -155,7 +155,7 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.title('Trajectory in V-n plane')
     plt.xlabel('voltage (mV)')
     plt.ylabel('n')
-    plt.plot(V.T,n.T, color = '#4B0082')
+    plt.plot(V.T,n.T)
     plt.plot(node[0], node[1],marker='o', color='0')
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
     y = np.linspace(-.1,.7,50)
@@ -177,7 +177,8 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     y = np.linspace(-.05,.5,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
-    plt.ylim((-.05,.65))
+    plt.ylim((-.01,.4))
+    plt.tight_layout()  
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''We count as quiet ISIs when V reached the neighbourhhod of the node'''
@@ -332,10 +333,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .160*ms
-Iapp =3.2 * uA #/cm**2
+tau_n = .155*ms
+Iapp =1.2 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 1.5*ms
+duration = 50000*ms
 
 
 
@@ -352,7 +353,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =3, v0=-50*mV, n0=.01, plot = True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = False)
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)

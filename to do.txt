@@ -35,6 +35,10 @@ Do not exactly node, but some area around it
 
 -phase portrait. something is still wrong. arrows don't go to the limit cycle
 
+Example pictures are for parameters: tau_n = .1575*ms
+					Iapp =2.3 * uA #/cm**2
+					I_noise = 2.5*uA
+
 
 
 
