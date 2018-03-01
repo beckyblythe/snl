@@ -10,19 +10,19 @@ I_noise = 2.5*uA
 duration = 50000*ms
 
 v0=-30*mV
-n0=-0
+n0=.05
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.set_xlabel('tau_n (ms)')
 ax.set_ylabel('Iapp (uA)')
 ax.set_zlabel('fraction of burtst ISIs')
-ax.set_xticks([.153,.155,.158, .162])
-ax.set_yticks([2,3,4])
-ax.view_init(30,-30)
+ax.set_xticks([.155, .1575,.16,.1625, .165])
+ax.set_yticks([1.2,2.3,3.2,3.9,4.3,4.51])
+ax.view_init(10,180)
 
-for tau_n in [ .153, .155,.158,.162]*ms:
-    for Iapp in [2.0,3.0,4.0]*uA:
+for tau_n in [ .155, .1575,.16,.1625, .165]*ms:
+    for Iapp in [1.2,2.3,3.2,3.9,4.3,4.51]*uA:
         for duration in [10000,50000]*ms:
 
             file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
@@ -30,7 +30,9 @@ for tau_n in [ .153, .155,.158,.162]*ms:
             
             try:     
                 data = get_simulation(file_name)
-                ratio = data['ISI_burst'].shape[0]/data['ISI'].shape[0]
+                ISIs = [ISI for neuron in data['ISI'] for ISI in neuron ]
+                ISI_quiet = [ISI for neuron in data['ISI_quiet'] for ISI in neuron ]
+                ratio = len(ISI_quiet)/len(ISIs)
                 print(tau_n/ms,Iapp/uA, ratio)    
                 ax.scatter(tau_n/ms,Iapp/uA, ratio)
                 

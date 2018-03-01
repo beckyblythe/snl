@@ -89,43 +89,43 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         
     file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
     print(file_name)
-    try:     
-        results = get_simulation(file_name)
-        print('Other plots are already generated. Find them in traces folder.')
+#    try:     
+#        results = get_simulation(file_name)
+#        print('Other plots are already generated. Find them in traces folder.')
+#    
+#    except IOError:
+    Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
+     
+    keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
+            'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
+            'ISI_burst', 'time_above', 'time_down','time_up', 'n_first_down', 
+            'n_last_down', 'n_first_up', 'n_last_up']
+    results = {key:[] for key in keys}
     
-    except IOError:
-        Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
-         
-        keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
-                'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
-                'ISI_burst', 'time_above', 'time_down','time_up', 'n_first_down', 
-                'n_last_down', 'n_first_up', 'n_last_up']
-        results = {key:[] for key in keys}
-        
-        for i in range(number):
-            V_i=V[i]
-            n_i=n[i]
-            Spikes = Spike_t[np.where(Spike_i == i)]
-            result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
-            for key in keys:
-                results[key].append(result_i[key]) 
-        
-        with open('simulations/'+file_name, 'wb') as f:
-            pickle.dump(results, f) 
-        
-        if plot:
-            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-            plt.savefig('traces/'+file_name+'.png') 
-            plt.show()
-            plt.close()
+    for i in range(number):
+        V_i=V[i]
+        n_i=n[i]
+        Spikes = Spike_t[np.where(Spike_i == i)]
+        result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
+        for key in keys:
+            results[key].append(result_i[key]) 
+    
+    with open('simulations/'+file_name, 'wb') as f:
+        pickle.dump(results, f) 
+    
+    if plot:
+        plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
+        plt.savefig('traces/'+file_name+'.png') 
+        plt.show()
+        plt.close()
             
      
-    if plot:
-        plot_histograms(results) 
-            
-        if duration/ms >1000:
-            plt.savefig('histograms/'+file_name+'.png')
-        plt.show()
+#    if plot:
+#        plot_histograms(results) 
+#            
+#        if duration/ms >1000:
+#            plt.savefig('histograms/'+file_name+'.png')
+#        plt.show()
    
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
@@ -155,7 +155,7 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.title('Trajectory in V-n plane')
     plt.xlabel('voltage (mV)')
     plt.ylabel('n')
-    plt.plot(V.T,n.T, color = '#4B0082')
+    plt.plot(V.T,n.T) #, color = '#4B0082')
     plt.plot(node[0], node[1],marker='o', color='0')
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
     y = np.linspace(-.1,.7,50)
@@ -172,12 +172,13 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.plot(V.T,n.T)
     plt.plot(node[0], node[1],marker='o', color='0')
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
-    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
-              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
-    y = np.linspace(-.05,.5,50)
+    plt.xlim((-70, -45))
+    #((min(node[0]-.5(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
+     #         max(node[0]-.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+.5*(cycle_boundary[0]-node[0]))))
+    y = np.linspace(-.05,.4,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
-    plt.ylim((-.05,.65))
+    plt.ylim((-.05,.4))
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''We count as quiet ISIs when V reached the neighbourhhod of the node'''
@@ -352,7 +353,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =3, v0=-50*mV, n0=.01, plot = True)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =3, v0=-50*mV, n0=.01, plot = True)
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
