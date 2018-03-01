@@ -43,7 +43,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spike_t, Spike_i, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.01], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.005], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=20*ms, 
@@ -89,37 +89,39 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         
     file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
     print(file_name)
-#    try:     
-#        results = get_simulation(file_name)
-#        print('Other plots are already generated. Find them in traces folder.')
-#    
-#    except IOError:
-    Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
-     
-    keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
-            'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
-            'ISI_burst', 'time_above', 'time_down','time_up', 'n_first_down', 
-            'n_last_down', 'n_first_up', 'n_last_up']
-    results = {key:[] for key in keys}
+
+    try:     
+        results = get_simulation(file_name)
+        print('Other plots are already generated. Find them in traces folder.')
     
-    for i in range(number):
-        V_i=V[i]
-        n_i=n[i]
-        Spikes = Spike_t[np.where(Spike_i == i)]
-        result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
-        for key in keys:
-            results[key].append(result_i[key]) 
-    
-    with open('simulations/'+file_name, 'wb') as f:
-        pickle.dump(results, f) 
-    
-    if plot:
-        plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-        plt.savefig('traces/'+file_name+'.png') 
-        plt.show()
-        plt.close()
+    except IOError:
+        Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
+         
+        keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
+                'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
+                'ISI_burst', 'time_above', 'time_down','time_up', 'n_first_down', 
+                'n_last_down', 'n_first_up', 'n_last_up']
+        results = {key:[] for key in keys}
+        
+        for i in range(number):
+            V_i=V[i]
+            n_i=n[i]
+            Spikes = Spike_t[np.where(Spike_i == i)]
+            result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
+            for key in keys:
+                results[key].append(result_i[key]) 
+        
+#        with open('simulations/'+file_name, 'wb') as f:
+#            pickle.dump(results, f) 
+        
+        if plot:
+            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
+            plt.savefig('traces/'+file_name+'.png') 
+            plt.show()
+            plt.close()
             
      
+
 #    if plot:
 #        plot_histograms(results) 
 #            
@@ -132,53 +134,55 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
 #    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
     
-#    plt.figure(figsize=(5., 5.))
-#    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 1)
-#    plt.plot(node[0], node[1],marker='o', color='0', ms = 5)
+    plt.figure(figsize=(3., 3.))
+    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
+#    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
 #    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=5)
-#    y = np.linspace(-.1,.7,50)
-#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-#    print(saddle, x[5:15], y[5:15])
-#    plt.plot(saddle[0], saddle[1], color = '0')
-#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
-#    plt.xlim((-70,0))
-#    plt.ylim((-.05,.7))
-    
-    plt.subplot2grid((2,2),(0,0), colspan=2)
-    plt.title('Voltage trace')
-    plt.xlabel('time (s)')
-    plt.ylabel('voltage (mV)')
-    plt.plot(t, V.T) 
-    plt.axhline(y = node[0],color='0', linestyle ='--')
-    plt.axhline(y = saddle[0],color='.5', linestyle ='--')
-    plt.subplot2grid((2,2),(1,0))
-    plt.title('Trajectory in V-n plane')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
-    plt.plot(V.T,n.T) #, color = '#4B0082')
-    plt.plot(node[0], node[1],marker='o', color='0')
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    plt.plot(saddle[0], saddle[1], color = '0')
-    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+    print(saddle, x[5:15], y[5:15])
+#    plt.plot(saddle[0], saddle[1], color = '0')
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
     plt.ylim((-.05,.7))
-#    plot_field(tau_n, Iapp, plot = True)
-    plt.subplot2grid((2,2),(1,1))
-    plt.title('Trajectory in V-n plane (zoomed)')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
-    plt.plot(V.T,n.T)
-    plt.plot(node[0], node[1],marker='o', color='0')
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
-    plt.xlim((-70, -45))
-    #((min(node[0]-.5(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
-     #         max(node[0]-.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+.5*(cycle_boundary[0]-node[0]))))
-    y = np.linspace(-.05,.4,50)
-    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
-    plt.ylim((-.05,.4))
+    
+#    plt.subplot2grid((2,2),(0,0), colspan=2)
+#    plt.title('Voltage trace')
+#    plt.xlabel('time (s)')
+#    plt.ylabel('voltage (mV)')
+#    plt.plot(t, V.T) 
+#    plt.axhline(y = node[0],color='0', linestyle ='--')
+#    plt.axhline(y = saddle[0],color='.5', linestyle ='--')
+#    plt.subplot2grid((2,2),(1,0))
+#    plt.title('Trajectory in V-n plane')
+#    plt.xlabel('voltage (mV)')
+#    plt.ylabel('n')
+#    plt.plot(V.T,n.T)
+#    plt.plot(node[0], node[1],marker='o', color='0')
+#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+#    y = np.linspace(-.1,.7,50)
+#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+#    plt.plot(saddle[0], saddle[1], color = '0')
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+#    plt.xlim((-70,0))
+#    plt.ylim((-.05,.7))
+
+##    plot_field(tau_n, Iapp, plot = True)
+#    plt.subplot2grid((2,2),(1,1))
+#    plt.title('Trajectory in V-n plane (zoomed)')
+#    plt.xlabel('voltage (mV)')
+#    plt.ylabel('n')
+#    plt.plot(V.T,n.T)
+#    plt.plot(node[0], node[1],marker='o', color='0')
+#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+#    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
+#              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
+#    y = np.linspace(-.05,.5,50)
+#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+#    plt.ylim((-.01,.4))
+#    plt.tight_layout()  
+
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     '''We count as quiet ISIs when V reached the neighbourhhod of the node'''
@@ -333,10 +337,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .160*ms
-Iapp =3.2 * uA #/cm**2
+tau_n = .17*ms
+Iapp =6 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 1.5*ms
+duration = 100*ms
 
 
 
@@ -353,8 +357,10 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =3, v0=-50*mV, n0=.01, plot = True)
 
-#find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = False)
+
+
+find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp, plot = True)
