@@ -17,7 +17,7 @@ plt.rcParams['image.cmap'] = 'gray'
 def get_simulation(file_name):
     '''reads simulation results from file or runs simulation'''
     #read from file
-    with open('simulations/'+file_name, 'rb') as f:
+    with open('old timestep too big/simulations/'+file_name, 'rb') as f:
         data_loaded = pickle.load(f)
     return data_loaded        
 
@@ -111,23 +111,23 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
             for key in keys:
                 results[key].append(result_i[key]) 
         
-#        with open('simulations/'+file_name, 'wb') as f:
-#            pickle.dump(results, f) 
+        with open('old timestep too big/simulations/'+file_name, 'wb') as f:
+            pickle.dump(results, f) 
         
-        if plot:
-            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-            plt.savefig('traces/'+file_name+'.png') 
-            plt.show()
-            plt.close()
+#        if plot:
+#            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
+#            plt.savefig('traces/'+file_name+'.png') 
+#            plt.show()
+#            plt.close()
             
      
 
-#    if plot:
-#        plot_histograms(results) 
-#            
-#        if duration/ms >1000:
-#            plt.savefig('histograms/'+file_name+'.png')
-#        plt.show()
+    if plot:
+        plot_histograms(results) 
+            
+        if duration/ms >1000:
+            plt.savefig('old timestep too big/histograms/'+file_name+'.png')
+        plt.show()
    
   
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
@@ -323,7 +323,7 @@ def find_sep_approx(tau_n, Iapp, saddle):
     return sep_slope
     
     
-defaultclock.dt = 0.00005*ms
+defaultclock.dt = 0.001*ms
 
 
 Cm = 1 * uF #/cm2
@@ -337,10 +337,10 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .17*ms
-Iapp =6 * uA #/cm**2
+tau_n = .1575*ms
+Iapp =3.2 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 100*ms
+duration = 10000*ms
 
 
 
@@ -358,9 +358,9 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
 
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = False)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = True)
 
 
-find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
+#find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp, plot = True)
