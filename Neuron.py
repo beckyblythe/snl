@@ -43,7 +43,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
                
     return Spike_t, Spike_i, t, V, n    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.005], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.0], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=20*ms, 
@@ -137,7 +137,7 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.figure(figsize=(3., 3.))
     plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
 #    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
-#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=5)
+#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     print(saddle, x[5:15], y[5:15])
@@ -337,8 +337,8 @@ E_K = -90 * mV
 tau = 1.0*ms
 
 #parameters to play with
-tau_n = .17*ms
-Iapp =6 * uA #/cm**2
+tau_n = .156*ms
+Iapp = 6 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 100*ms
 

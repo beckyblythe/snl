@@ -23,13 +23,16 @@ Do not exactly node, but some area around it
 
 -Spykeviewer. something doesn't work. maybe it's about units. check it.
 -why with new dt I'm getting weird stuff close to zero in burst_ISIs?
+-Think about the title and the abstract
 -------------------------------------------------------------
 
 
 -look at Jan-Hendrik's code
--Think about the title and the abstract
+
 -Compare properly new results to old results
 -Running simulations now with noise 2.5. maybe we can actually see proper bimodal stuff
+
+-can it be nicely bimodal to the left from the bifurcation? (so that quiet ISI dominate, are the default regime)
 
 -maybe fix the plotting. now it's really not obvious when and what is plotted!
 
@@ -45,6 +48,8 @@ Example pictures are for parameters: tau_n = .1575*ms
 
 -to think what tau value for noise is reasonable. 
 
+
+//////////
 Noisy dynamics of a neuron with co-existing spiking and resting states.
 
 
