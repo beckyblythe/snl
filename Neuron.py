@@ -338,11 +338,10 @@ tau = 1.0*ms
 
 #parameters to play with
 
-tau_n = .1575*ms
-Iapp =3.2 * uA #/cm**2
->>>>>>> 510712c8b806d6cca516175775d6e7eec1efccc4
+tau_n = .16*ms
+Iapp =3.9 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 10000*ms
+duration = 40000*ms
 
 
 
