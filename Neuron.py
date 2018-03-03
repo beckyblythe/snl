@@ -2,7 +2,7 @@ from brian2 import *
 import numpy as np
 import pickle
 from collections import OrderedDict
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 class Object(object):
