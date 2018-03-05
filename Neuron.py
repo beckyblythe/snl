@@ -3,7 +3,7 @@ from brian2 import *
 import numpy as np
 import pickle
 from collections import OrderedDict
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 class Object(object):
@@ -339,8 +339,9 @@ tau = 1.0*ms
 
 #parameters to play with
 
+# .1575 + 2.3, .155 + 1.2, .16 + 3.2, .1625 + 3.9
 tau_n = .16*ms
-Iapp =3.9 * uA #/cm**2
+Iapp =3.2 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 40000*ms
 
