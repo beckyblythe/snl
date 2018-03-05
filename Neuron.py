@@ -1,3 +1,4 @@
+#import matplotlib.pyplot as plt
 from brian2 import *
 import numpy as np
 import pickle
@@ -9,9 +10,9 @@ class Object(object):
     pass
 
 
-plt.rcParams['figure.figsize'] = 9, 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-plt.rcParams['agg.path.chunksize'] = 10000
-plt.rcParams['image.cmap'] = 'gray'
+#plt.rcParams['figure.figsize'] = 9, 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+#plt.rcParams['agg.path.chunksize'] = 10000
+#plt.rcParams['image.cmap'] = 'gray'
 
 
 def get_simulation(file_name):
@@ -359,7 +360,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = False)
 
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
