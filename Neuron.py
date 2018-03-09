@@ -341,9 +341,9 @@ tau = 1.0*ms
 
 # .1575 + 2.3, .155 + 1.2, .16 + 3.2, .1625 + 3.9
 tau_n = .16*ms
-Iapp =3.2 * uA #/cm**2
+Iapp =3.5 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 40000*ms
+duration = 50000*ms
 
 
 
@@ -361,7 +361,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = False)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = True)
 
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
