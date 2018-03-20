@@ -44,6 +44,17 @@ Example pictures are for parameters: tau_n = .1575*ms
 
 
 
+!!!!!!
+To include number of neurons in file name
+To clean the code
+To run stuff for bigger timestep
+
+Bimodal!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 
 
 -to think what tau value for noise is reasonable. 

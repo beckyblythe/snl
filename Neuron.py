@@ -24,31 +24,25 @@ def get_simulation(file_name):
 
 def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
-    #run simulation    
-    print(tau_n, Iapp)
+    #run simulation       
     neuron = NeuronGroup(number, eqs,  threshold = 'v >-.02*volt', refractory = 'v > -.03*volt')
     neuron.v = v0 
     neuron.n = n0
         
-    M_temp = SpikeMonitor(neuron, variables = 'v')
-    Mv_temp = StateMonitor(neuron, 'v', record=True)
-    Mn_temp = StateMonitor(neuron, 'n', record=True)
+    M = SpikeMonitor(neuron, variables = 'v')
+    Mv = StateMonitor(neuron, 'v', record=True)
+    Mn = StateMonitor(neuron, 'n', record=True)
     
     run(duration, report='text')
-        
-    Spike_t = np.array(M_temp.t)
-    Spike_i = np.array(M_temp.i)
-    t = np.array(Mv_temp.t)
-    V = np.array(Mv_temp.v)*1000 #-----> mV
-    n = np.array(Mn_temp.n)
-               
-    return Spike_t, Spike_i, t, V, n    
+
+    return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
 def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.0], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=20*ms, 
                                       I_noise=0*uA)
+    V*=1000
     node = [max(V[0]),n[0,np.argmax(V[0])]]
     cycle_boundary= [min (V[-1]), n[0,np.argmin(V[-1])]]
     saddle = find_saddle(tau_n, Iapp, node, cycle_boundary)
@@ -90,6 +84,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         
     file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
     print(file_name)
+    
 
     try:     
         results = get_simulation(file_name)
@@ -97,6 +92,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
     
     except IOError:
         Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
+        V*=1000
+        print(Spike_t, Spike_i)
          
         keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
                 'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
@@ -107,7 +104,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         for i in range(number):
             V_i=V[i]
             n_i=n[i]
-            Spikes = Spike_t[np.where(Spike_i == i)]
+            print(np.where(Spike_i==i)[0])
+            Spikes = Spike_t[np.where(Spike_i == i)[0]]
             result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
             for key in keys:
                 results[key].append(result_i[key]) 
@@ -260,12 +258,12 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 500)
+            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 50)
         else:
-            ax.hist(flat_intervals*1000, normed = False, bins = 100)
+            ax.hist(flat_intervals*1000, normed = False, bins = 50)
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
         if key == 'ISI': 
-            ax.set_xlim((0,50))
+            ax.set_xlim((0,200))
             xmin,xmax = ax.get_xlim()
         elif key in ['ISI_burst', 'time_down', 'time_above']:
             ax.set_xlim((0,10))
@@ -340,10 +338,10 @@ tau = 1.0*ms
 #parameters to play with
 
 # .1575 + 2.3, .155 + 1.2, .16 + 3.2, .1625 + 3.9
-tau_n = .16*ms
-Iapp =3.5 * uA #/cm**2
+tau_n = .155*ms
+Iapp =1.1 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 50000*ms
+duration = 50*ms
 
 
 
@@ -361,7 +359,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot = True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot=True)
 
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
