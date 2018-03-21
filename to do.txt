@@ -45,7 +45,9 @@ Example pictures are for parameters: tau_n = .1575*ms
 
 
 !!!!!!
-To include number of neurons in file name
+To include number of neurons in file name. 155 1.1 - 10 neurons
+old timestep - new timestep
+zoom in initial segment of the histogram
 To clean the code
 To run stuff for bigger timestep
 

@@ -93,8 +93,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
     except IOError:
         Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
         V*=1000
-        print(Spike_t, Spike_i)
-         
+       
         keys = ['quiet_ISI_indices', 'quiet_ISI_start', 'quiet_ISI_end', 'break_point', 
                 'first_down', 'last_down', 'first_up', 'last_up', 'ISI', 'ISI_quiet', 
                 'ISI_burst', 'time_above', 'time_down','time_up', 'n_first_down', 
@@ -104,7 +103,6 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         for i in range(number):
             V_i=V[i]
             n_i=n[i]
-            print(np.where(Spike_i==i)[0])
             Spikes = Spike_t[np.where(Spike_i == i)[0]]
             result_i = collect_ISI_stats(t, V_i, n_i, Spikes, saddle, sep_slope, node)
             for key in keys:
@@ -113,11 +111,11 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         with open('old timestep too big/simulations/'+file_name, 'wb') as f:
             pickle.dump(results, f) 
         
-#        if plot:
-#            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-#            plt.savefig('traces/'+file_name+'.png') 
-#            plt.show()
-#            plt.close()
+        if plot:
+            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
+            plt.savefig('traces/'+file_name+'.png') 
+            plt.show()
+            plt.close()
             
      
 
@@ -258,12 +256,12 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 50)
+            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 200)
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 50)
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
         if key == 'ISI': 
-            ax.set_xlim((0,200))
+            ax.set_xlim((0,1000))
             xmin,xmax = ax.get_xlim()
         elif key in ['ISI_burst', 'time_down', 'time_above']:
             ax.set_xlim((0,10))
@@ -341,7 +339,7 @@ tau = 1.0*ms
 tau_n = .155*ms
 Iapp =1.1 * uA #/cm**2
 I_noise = 2.5*uA
-duration = 50*ms
+duration = 50000*ms
 
 
 
@@ -359,7 +357,7 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, v0=-50*mV, n0=.01, plot=True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-50*mV, n0=.01, plot=True)
 
 
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
