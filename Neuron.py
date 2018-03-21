@@ -10,7 +10,7 @@ class Object(object):
     pass
 
 
-#plt.rcParams['figure.figsize'] = 9, 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+plt.rcParams['figure.figsize'] = 9, 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 #plt.rcParams['agg.path.chunksize'] = 10000
 #plt.rcParams['image.cmap'] = 'gray'
 
@@ -50,16 +50,12 @@ def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -
     
     file_name = str(tau_n)+'  '+str(Iapp)
     if plot:
-        plot_traces(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
+        plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
         plt.savefig('points/'+file_name+'.png') 
-#        plt.close()
-#        plt.show()
-#    if node[0] >= cycle_boundary[0]:
-#        raise Exception('We passed saddle-node bifurcation point or limit cycle doesnt exist! Try different parameters.')
 
     return node, saddle, sep_slope, cycle_boundary
     
-def get_points(tau_n, Iapp):
+def get_points(tau_n, Iapp, plot=False):
     '''loads or calculates node, saddle and limit cycle lowest voltage '''
     file_name = 'points/'+str(tau_n)+'  '+str(Iapp)
     #read from file
@@ -71,7 +67,7 @@ def get_points(tau_n, Iapp):
         sep_slope = data_loaded['sep_slope']
         cycle_boundary = data_loaded['cycle_boundary']
     except FileNotFoundError:
-        node, saddle, sep_slope, cycle_boundary = find_points(tau_n, Iapp)
+        node, saddle, sep_slope, cycle_boundary=find_points(tau_n, Iapp, plot=plot)
         points_calculated = {'node':node, 'saddle':saddle, 'sep_slope':sep_slope, 'cycle_boundary':cycle_boundary}
         with open(file_name, 'wb') as f:
             pickle.dump(points_calculated, f)   
@@ -80,12 +76,13 @@ def get_points(tau_n, Iapp):
            
 def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0, plot = False):
     '''simulates neuron and plots all the available plots'''
-    node, saddle, sep_slope, cycle_boundary = get_points(tau_n,Iapp) 
-        
     file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
     print(file_name)
     
-
+    node, saddle, sep_slope, cycle_boundary = get_points(tau_n, Iapp, plot) 
+    if node[0] >= cycle_boundary[0]-.00001:
+        print('We are not in the bistable regime! Consider trying different parameters!.')
+        
     try:     
         results = get_simulation(file_name)
         print('Other plots are already generated. Find them in traces folder.')
@@ -110,75 +107,67 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         
         with open('old timestep too big/simulations/'+file_name, 'wb') as f:
             pickle.dump(results, f) 
-        
-        if plot:
-            plot_traces(t,V,n,node,saddle, sep_slope, cycle_boundary)
-            plt.savefig('traces/'+file_name+'.png') 
-            plt.show()
-            plt.close()
             
-     
-
+        if plot and duration <= 100*ms:
+            plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary)
+                    
     if plot:
         plot_histograms(results) 
             
-        if duration/ms >1000:
+        if duration/ms > 1000:
             plt.savefig('old timestep too big/histograms/'+file_name+'.png')
         plt.show()
    
   
-def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
-    '''plots voltage against time'''   
-#    plot_animated(np.array([V.T.flatten(), n.T.flatten()]),node, saddle, sep_slope, cycle_boundary)
-    
+def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
     plt.figure(figsize=(3., 3.))
     plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
-#    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
-#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
+    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    print(saddle, x[5:15], y[5:15])
-#    plt.plot(saddle[0], saddle[1], color = '0')
-#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
+    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
     plt.ylim((-.05,.7))
-    
-#    plt.subplot2grid((2,2),(0,0), colspan=2)
-#    plt.title('Voltage trace')
-#    plt.xlabel('time (s)')
-#    plt.ylabel('voltage (mV)')
-#    plt.plot(t, V.T) 
-#    plt.axhline(y = node[0],color='0', linestyle ='--')
-#    plt.axhline(y = saddle[0],color='.5', linestyle ='--')
-#    plt.subplot2grid((2,2),(1,0))
-#    plt.title('Trajectory in V-n plane')
-#    plt.xlabel('voltage (mV)')
-#    plt.ylabel('n')
-#    plt.plot(V.T,n.T)
-#    plt.plot(node[0], node[1],marker='o', color='0')
-#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
-#    y = np.linspace(-.1,.7,50)
-#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-#    plt.plot(saddle[0], saddle[1], color = '0')
-#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
-#    plt.xlim((-70,0))
-#    plt.ylim((-.05,.7))
 
-##    plot_field(tau_n, Iapp, plot = True)
-#    plt.subplot2grid((2,2),(1,1))
-#    plt.title('Trajectory in V-n plane (zoomed)')
-#    plt.xlabel('voltage (mV)')
-#    plt.ylabel('n')
-#    plt.plot(V.T,n.T)
-#    plt.plot(node[0], node[1],marker='o', color='0')
-#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
-#    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
-#              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
-#    y = np.linspace(-.05,.5,50)
-#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
-#    plt.ylim((-.01,.4))
-#    plt.tight_layout()  
+def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
+    '''plots voltage against time'''   
+
+    plt.subplot2grid((2,2),(0,0), colspan=2)
+    plt.title('Voltage trace')
+    plt.xlabel('time (s)')
+    plt.ylabel('voltage (mV)')
+    plt.plot(t, V.T) 
+    plt.axhline(y = node[0],color='0', linestyle ='--')
+    plt.axhline(y = saddle[0],color='.5', linestyle ='--')
+    plt.subplot2grid((2,2),(1,0))
+    plt.title('Trajectory in V-n plane')
+    plt.xlabel('voltage (mV)')
+    plt.ylabel('n')
+    plt.plot(V.T,n.T)
+    plt.plot(node[0], node[1],marker='o', color='0')
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+    y = np.linspace(-.1,.7,50)
+    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+    plt.plot(saddle[0], saddle[1], color = '0')
+    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+    plt.xlim((-70,0))
+    plt.ylim((-.05,.7))
+#    plot_field(tau_n, Iapp, plot = True)
+    plt.subplot2grid((2,2),(1,1))
+    plt.title('Trajectory in V-n plane (zoomed)')
+    plt.xlabel('voltage (mV)')
+    plt.ylabel('n')
+    plt.plot(V.T,n.T)
+    plt.plot(node[0], node[1],marker='o', color='0')
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
+    plt.xlim((min(node[0]-(cycle_boundary[0]-node[0]),cycle_boundary[0]+(cycle_boundary[0]-node[0])), 
+              max(node[0]-3.5*(cycle_boundary[0]-node[0]),cycle_boundary[0]+3.5*(cycle_boundary[0]-node[0]))))
+    y = np.linspace(-.05,.5,50)
+    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 2)
+    plt.ylim((-.01,.4))
+    plt.tight_layout()  
 
     
 def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
@@ -234,7 +223,6 @@ def collect_ISI_stats(t, V,n, Spikes, saddle, sep_slope, node):
     time_above, time_down, time_up = calculate_quiet_ISIs_partition(ISI_quiet, break_point, last_down, last_up)
     result = locals()
     return result
-
                  
 
 def calculate_ISI(Spikes):
@@ -244,7 +232,7 @@ def calculate_ISI(Spikes):
 def plot_histograms(results):
     '''plots histogram for all ISIs, classified ISIs, and quiet ISIs segments'''
     
-    fig = plt.figure(figsize = (12,8))
+    fig = plt.figure()
     keys_ordered = ['ISI', 'ISI_quiet', 'ISI_burst','time_down',
                 'time_up', 'time_above']
     intervals = results
@@ -267,27 +255,8 @@ def plot_histograms(results):
             ax.set_xlim((0,10))
         else:
             ax.set_xlim=((xmin,xmax))
-      
-
+    
     plt.tight_layout()  
-    
-def plot_field(tau_n, Iapp, plot = False):
-    '''Plots phase plane for given parameters'''
-    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,8), np.linspace(-0,.7,8))
-    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)
-                -g_L*(v_grid-E_L/mV)+Iapp/mV/1000)/Cm)*ms/70
-    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms/.75
-    #Normalization to have all vectors of the same length (otherwise the small ones are too small)
-    norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
-#    print(dv_grid)
-    dv_grid += 2*dv_grid/norm
-    dn_grid += 2*dn_grid/norm
-    
-    if plot:
-#        plt.figure()
-        plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .002)
-#        plt.close()
-#        plt.show()
     
 def find_saddle(tau_n, Iapp, node, cycle_boundary):
     '''Finds saddle location given parameters'''
@@ -319,10 +288,25 @@ def find_sep_approx(tau_n, Iapp, saddle):
   
     return sep_slope
     
+def plot_field(tau_n, Iapp, plot = False):
+    '''Plots phase plane for given parameters'''
+    v_grid ,n_grid = np.meshgrid(np.linspace(-70,0,8), np.linspace(-0,.7,8))
+    dv_grid = ((-g_Na*1./(1+exp((-20-v_grid)/15.))*(v_grid-E_Na/mV)-g_K*n_grid*(v_grid-E_K/mV)
+                -g_L*(v_grid-E_L/mV)+Iapp/mV/1000)/Cm)*ms/70
+    dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms/.75
+    #Normalization to have all vectors of the same length (otherwise the small ones are too small)
+    norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+#    print(dv_grid)
+    dv_grid += 2*dv_grid/norm
+    dn_grid += 2*dn_grid/norm
     
-defaultclock.dt = 0.001*ms
+    if plot:
+#        plt.figure()
+        plt.quiver(v_grid,n_grid,dv_grid,dn_grid, width = .002)
+#        plt.close()
+#        plt.show()
 
-
+###########################################
 Cm = 1 * uF #/cm2
 g_L = 8 * msiemens #/cm2
 g_Na = 20 * msiemens#/cm2
@@ -330,19 +314,8 @@ g_K = 10 * msiemens #/cm2
 E_L = -80 * mV
 E_Na = 60 * mV
 E_K = -90 * mV
-
 tau = 1.0*ms
-
-#parameters to play with
-
-# .1575 + 2.3, .155 + 1.2, .16 + 3.2, .1625 + 3.9
-tau_n = .155*ms
-Iapp =1.1 * uA #/cm**2
-I_noise = 2.5*uA
-duration = 50000*ms
-
-
-
+############################################
 eqs = '''
 dv/dt = (-I_Na - I_K -  I_L + Iapp+I_noise*sqrt(tau)*xi)/Cm : volt
 dn/dt = (n_inf-n)/tau_n : 1
@@ -352,14 +325,20 @@ I_L = g_L*(v-E_L) : amp
 n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
+############################################
+defaultclock.dt = 0.001*ms
+
+#parameters to play with
+tau_n = .155*ms
+Iapp =1 * uA #/cm**2
+I_noise = 2.5*uA
+duration = 99*ms
+
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-50*mV, n0=.01, plot=True)
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-50*mV, n0=.01, plot=True)
-
-
 #find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp, plot = True)
