@@ -260,6 +260,7 @@ def plot_histograms(results):
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 50)
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
+        ax.axvline(np.median(flat_intervals)*1000, color = 'b')
         if key == 'ISI': 
             ax.set_xlim((0,1000))
             xmin,xmax = ax.get_xlim()
