@@ -18,11 +18,11 @@ plt.rcParams['figure.figsize'] = 9, 6
 def get_simulation(file_name):
     '''reads simulation results from file or runs simulation'''
     #read from file
-    with open('old timestep too big/simulations/'+file_name, 'rb') as f:
+    with open('simulations/'+file_name, 'rb') as f:
         data_loaded = pickle.load(f)
     return data_loaded        
 
-def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
+def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise, dt=.001*ms):
     '''runs simulation, returns M,Mv and Mn as objects with dimensionless np.arrays attributes'''
     #run simulation       
     neuron = NeuronGroup(number, eqs,  threshold = 'v >-.02*volt', refractory = 'v > -.03*volt')
@@ -33,15 +33,17 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise):
     Mv = StateMonitor(neuron, 'v', record=True)
     Mn = StateMonitor(neuron, 'n', record=True)
     
+    defaultclock.dt = dt
     run(duration, report='text')
 
     return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
-def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -.1,-.1,.0], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-50]*mV,n0=[.05,.005], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
-    Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 6, v0=v0, n0=n0, duration=20*ms, 
-                                      I_noise=0*uA)
+    dt=.00005*ms
+    Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 2, v0=v0, n0=n0, duration=20*ms, 
+                                      I_noise=0*uA, dt=dt)
     V*=1000
     node = [max(V[0]),n[0,np.argmax(V[0])]]
     cycle_boundary= [min (V[-1]), n[0,np.argmin(V[-1])]]
@@ -52,6 +54,7 @@ def find_points(tau_n, Iapp, v0=[-75,-65,-40, -64,-60,-50]*mV,n0=[.05,.05,-.1, -
     if plot:
         plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
         plt.savefig('points/'+file_name+'.png') 
+        plt.show()
 
     return node, saddle, sep_slope, cycle_boundary
     
@@ -74,9 +77,9 @@ def get_points(tau_n, Iapp, plot=False):
             
     return node, saddle, sep_slope, cycle_boundary
            
-def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0, plot = False):
+def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
     '''simulates neuron and plots all the available plots'''
-    file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second)+' s  '+str(I_noise)
+    file_name=str(duration/second)+' s  '+str(I_noise)+' '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
     print(file_name)
     
     node, saddle, sep_slope, cycle_boundary = get_points(tau_n, Iapp, plot) 
@@ -88,6 +91,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         print('Other plots are already generated. Find them in traces folder.')
     
     except IOError:
+        v0=(np.ones(number)*node[0]+np.random.randn(number))*mV
+        n0=np.ones(number)*node[1]+np.random.randn(number)*.01
         Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
         V*=1000
        
@@ -105,7 +110,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
             for key in keys:
                 results[key].append(result_i[key]) 
         
-        with open('old timestep too big/simulations/'+file_name, 'wb') as f:
+        with open('simulations/'+file_name, 'wb') as f:
             pickle.dump(results, f) 
             
         if plot and duration <= 100*ms:
@@ -115,7 +120,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, v0=-30*mV, n0=-0,
         plot_histograms(results) 
             
         if duration/ms > 1000:
-            plt.savefig('old timestep too big/histograms/'+file_name+'.png')
+            plt.savefig('histograms/'+file_name+'.png')
         plt.show()
    
   
@@ -129,7 +134,7 @@ def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
     plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
     plt.ylim((-.05,.7))
-
+    
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
 
@@ -178,11 +183,13 @@ def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     around_node = (V<=node[0]+.1*(saddle[0]-node[0])) & (t>Spikes[0]) & (t < Spikes[-1])
     #array of spikes indices, after which there is a quiet ISI
     quiet_ISI_indices = np.unique(np.searchsorted(Spikes, t[around_node]))-1
+    print("1")
     t_around_node = t[around_node]
     t_below_sep = t[below_sep]
     t_above_sep = t[above_sep]
     n_below_sep = n[below_sep]
     n_above_sep = n[above_sep]
+    print("2")
     #check this again   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1 
     quiet_ISI_start = Spikes[quiet_ISI_indices]
     quiet_ISI_end = Spikes[quiet_ISI_indices+1]
@@ -191,18 +198,19 @@ def quiet_stats(t, V, n, Spikes, saddle, sep_slope,node):
     first_above_sep_indices = np.unique(np.searchsorted(t_above_sep, break_point))
     last_above_sep_indices = first_above_sep_indices-1
     last_below_sep_indices = np.unique(np.searchsorted(t_below_sep, quiet_ISI_end))-1
-    
+    print("3")
     first_down = t_below_sep[first_below_sep_indices]
     last_down = t_above_sep[last_above_sep_indices]
     first_up = t_above_sep[first_above_sep_indices]
     last_up = t_below_sep[last_below_sep_indices]
-
+    print("4")
     n_first_down = n_below_sep[first_below_sep_indices]
     n_last_down = n_above_sep[last_above_sep_indices]
     n_first_up = n_above_sep[first_above_sep_indices]
     n_last_up = n_below_sep[last_below_sep_indices] 
     #also do n_first_up here!!!!!!
 #    print(n_last_up)
+    print("5")
     
     return quiet_ISI_indices, quiet_ISI_start, quiet_ISI_end, break_point, first_down, last_down, first_up, last_up, n_first_down, n_last_down, n_first_up, n_last_up
     
@@ -250,7 +258,7 @@ def plot_histograms(results):
         ax.axvline(flat_intervals.mean()*1000, color = 'r')
         ax.axvline(np.median(flat_intervals)*1000, color = 'b')
         if key == 'ISI': 
-            ax.set_xlim((0,1000))
+            ax.set_xlim((0,500))
             xmin,xmax = ax.get_xlim()
         elif key in ['ISI_burst', 'time_down', 'time_above']:
             ax.set_xlim((0,10))
@@ -327,15 +335,15 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 ############################################
-defaultclock.dt = 0.001*ms
+#defaultclock.dt = 0.001*ms
 
 #parameters to play with
-tau_n = .155*ms
-Iapp =1 * uA #/cm**2
+tau_n = .165*ms
+Iapp =4.3* uA #/cm**2
 I_noise = 2.5*uA
-duration = 99*ms
+duration = 50000*ms
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, v0=-50*mV, n0=.01, plot=True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =8, plot=True)
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
