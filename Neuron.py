@@ -350,7 +350,7 @@ print ('Iapp = ' + str(args[1]))
 
 tau_n = args[0] * ms
 Iapp = args[1] * uA #/cm**2
-I_noise = 2*uA
+I_noise = 2.5*uA
 duration = 50000*ms
 
 plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, plot=False)
