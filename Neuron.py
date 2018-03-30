@@ -1,4 +1,5 @@
 #import matplotlib.pyplot as plt
+import argparse
 from brian2 import *
 import numpy as np
 import pickle
@@ -337,13 +338,22 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 ############################################
 #defaultclock.dt = 0.001*ms
 
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('parameters', metavar='N', type=float, nargs='+',
+                   help='tau_n, Iapp')
+args = parser.parse_args().parameters
+
 #parameters to play with
-tau_n = .165*ms
-Iapp =4.3* uA #/cm**2
-I_noise = 2.5*uA
+
+print ('tau_n = ' + str(args[0]))
+print ('Iapp = ' + str(args[1]))
+
+tau_n = args[0] * ms
+Iapp = args[1] * uA #/cm**2
+I_noise = 2*uA
 duration = 50000*ms
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =8, plot=True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =10, plot=False)
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
