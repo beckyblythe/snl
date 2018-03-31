@@ -253,11 +253,11 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            cut = np.where(flat_intervals <= 10*flat_intervals.mean())
+            cut = np.where(flat_intervals <= 5*np.median(flat_intervals))
             ax.hist(flat_intervals[cut]*1000, normed = True, bins = 50, log = True)
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 50)
-        ax.axvline(flat_intervals.mean()*1000, color = 'r')
+#        ax.axvline(flat_intervals.mean()*1000, color = 'r')
         ax.axvline(np.median(flat_intervals)*1000, color = 'b')
         if key == 'ISI': 
 #            ax.set_xlim((0,5*flat_intervals.mean()*1000))

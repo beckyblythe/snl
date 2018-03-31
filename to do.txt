@@ -25,6 +25,8 @@ Do not exactly node, but some area around it
 -why with new dt I'm getting weird stuff close to zero in burst_ISIs?
 -Think about the title and the abstract
 -------------------------------------------------------------
+simulate 50 neurons for suspicious/not enough data araeas!!!!!
+
 
 
 -look at Jan-Hendrik's code
