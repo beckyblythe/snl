@@ -1,30 +1,42 @@
-from Neuron import get_points
 import numpy as np
+from brian2 import *
+from Neuron import *
 
-tau_n = .155*ms
-Iapp = 1.2* uA #/cm**2
-I_noise = 2*uA
-duration = 10000*ms
+tau_ns = [ .155, .1575,.16,.1625, .165]*ms
+Iapps = [1.2,2.3,3.2,3.9,4.3]*uA
+I_noises = [2,2.5,3]*uA
+duration = 50*second
+number = 10
 
-v0=-30*mV
-n0=.05
+for I_noise in I_noises:
+    for tau_n in tau_ns:
+        for Iapp in Iapps:
+            file_name=str(duration/second)+' s  '+str(I_noise)+' '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
+            print(file_name)
+            try:     
 
-_, saddle, sep_slope, _ = get_points(tau_n, Iapp)
-
-file_name=str(tau_n)+'  '+str(Iapp)+'  ('+str(v0)+', '+str(n0)+')  '+str(duration/second) +' s  '+str(I_noise)
-
-with open('simulations/'+file_name, 'rb') as f:
-    results = pickle.load(f)
+                with open('simulations/'+file_name, 'rb') as f:
+                    results = get_simulation(file_name)
     
-n_last_down = np.array([n for neuron in results['n_last_down'] for n in neuron])
-n_last_up = np.array([n for neuron in results['n_last_up'] for n in neuron])
+                    n_last_down = np.array([n for neuron in results['n_last_down'] for n in neuron])
+                    n_last_up = np.array([n for neuron in results['n_last_up'] for n in neuron])
 
 
-V_last_down = (n_last_down - saddle[1])*sep_slope[0]/sep_slope[1] + saddle[0]
-
-
-plt.figure(figsize=(3., 3.))
-plt.hist(n_last_down, bins = 15)
-plt.xlabel('n')
-plt.ylabel ('Distribution of n')
-plt.savefig('down_distr/'+file_name+'.png', bbox_inches='tight') 
+                    plt.figure(figsize=(3., 3.))
+                    plt.hist(n_last_down, bins = 30)
+                    plt.xlabel('n')
+                    plt.ylabel ('Distribution of n')
+                    plt.savefig('down_distr/'+file_name+'.png', bbox_inches='tight') 
+                    plt.show()
+                    plt.close()
+                    
+                    plt.figure(figsize=(3., 3.))
+                    plt.hist(n_last_up, bins = 30)
+                    plt.xlabel('n')
+                    plt.ylabel ('Distribution of n')
+                    plt.savefig('up_distr/'+file_name+'.png', bbox_inches='tight') 
+                    plt.show()
+                    plt.close()
+                    
+            except IOError:
+                pass
