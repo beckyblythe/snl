@@ -38,7 +38,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise, dt=.001*ms):
 
     return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
-def find_points(tau_n, Iapp, v0=[-75,-50]*mV,n0=[.05,.005], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-50]*mV,n0=[.05,.01], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     dt=.00005*ms
@@ -338,16 +338,16 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #defaultclock.dt = 0.001*ms
 
 #parameters to play with
-tau_n = .165*ms
-Iapp =4.3* uA #/cm**2
+tau_n = .1675*ms
+Iapp =4.45* uA #/cm**2
 I_noise = 2.5*uA
 duration = 50000*ms
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =8, plot=True)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =8, plot=True)
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-#find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
+find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp, plot = True)
