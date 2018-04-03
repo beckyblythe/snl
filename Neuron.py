@@ -1,4 +1,5 @@
 #import matplotlib.pyplot as plt
+import argparse
 from brian2 import *
 import numpy as np
 import pickle
@@ -79,7 +80,7 @@ def get_points(tau_n, Iapp, plot=False):
            
 def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
     '''simulates neuron and plots all the available plots'''
-    file_name=str(duration/second)+' s  '+str(I_noise)+' '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
+    file_name=str(duration/second)+' s  '+str(I_noise)+' uA  '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
     print(file_name)
     
     node, saddle, sep_slope, cycle_boundary = get_points(tau_n, Iapp, plot) 
@@ -252,13 +253,14 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            ax.hist(flat_intervals[np.where(flat_intervals>.0005)]*1000, normed = False, bins = 200)
+            cut = np.where(flat_intervals <= 1*np.mean(flat_intervals))
+            ax.hist(flat_intervals[cut]*1000, normed = True, bins = 50, log = True)
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 50)
-        ax.axvline(flat_intervals.mean()*1000, color = 'r')
+#        ax.axvline(flat_intervals.mean()*1000, color = 'r')
         ax.axvline(np.median(flat_intervals)*1000, color = 'b')
         if key == 'ISI': 
-            ax.set_xlim((0,500))
+#            ax.set_xlim((0,5*flat_intervals.mean()*1000))
             xmin,xmax = ax.get_xlim()
         elif key in ['ISI_burst', 'time_down', 'time_above']:
             ax.set_xlim((0,10))
@@ -337,17 +339,29 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 ############################################
 #defaultclock.dt = 0.001*ms
 
-#parameters to play with
-tau_n = .1675*ms
-Iapp =4.45* uA #/cm**2
-I_noise = 2.5*uA
-duration = 50000*ms
 
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =8, plot=True)
+#parser = argparse.ArgumentParser(description='Process some integers.')
+#parser.add_argument('parameters', metavar='N', type=float, nargs='+',
+#                   help='tau_n, Iapp')
+#args = parser.parse_args().parameters
+#
+##parameters to play with
+#
+#print ('tau_n = ' + str(args[0]))
+#print ('Iapp = ' + str(args[1]))
+#
+#tau_n = args[0] * ms
+#Iapp = args[1] * uA #/cm**2
+#I_noise = 2.5*uA
+#duration = 50000*ms
+#
+#
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =40, plot=False)
+
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
 #ISIs = calculate_ISI(Spikes)
 #plt.hist(ISIs, bins = 100)
-find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
+#find_points(tau_n=tau_n, Iapp=Iapp, plot = True)
 #find_sep_approx(tau_n=tau_n, Iapp=Iapp)
 #plot_field(tau_n, Iapp, plot = True)
