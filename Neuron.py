@@ -253,7 +253,7 @@ def plot_histograms(results):
         ax.set_xlabel('time (ms)')
         ax.set_ylabel('Distribution of times')
         if key == 'ISI':
-            cut = np.where(flat_intervals <= 1*np.mean(flat_intervals))
+            cut = np.where(flat_intervals <= 1*np.median(flat_intervals))
             ax.hist(flat_intervals[cut]*1000, normed = True, bins = 50, log = True)
         else:
             ax.hist(flat_intervals*1000, normed = False, bins = 50)
@@ -268,6 +268,16 @@ def plot_histograms(results):
             ax.set_xlim=((xmin,xmax))
     
     plt.tight_layout()  
+    
+def plot_quiet_and_burst_hist(results):
+    intervals = results
+    keys_ordered = ['ISI_quiet', 'ISI_burst']
+    colors = ['.5','1']
+    plt.figure()
+    for key, color in zip(keys_ordered,colors):
+        flat_intervals = np.array([interval for neuron in intervals[key] for interval in neuron])
+        plt.hist(flat_intervals*1000, normed = False, bins = 50, color=color, alpha = .5, range = ((0,200)))
+    plt.show()
     
 def find_saddle(tau_n, Iapp, node, cycle_boundary):
     '''Finds saddle location given parameters'''
