@@ -281,6 +281,18 @@ def plot_quiet_and_burst_hist(results):
         plt.hist(flat_intervals*1000, normed = False, bins = 50, color=color, alpha = .5, range = ((0,10*mean)), log = False)
     plt.tight_layout()
     
+def plot_segments_hist(results):
+    intervals = results
+    keys_ordered = ['time_above','time_up', 'time_down']
+    colors = ['b','r', 'g']
+    plt.figure()
+    flat_intervals = np.array([interval for neuron in intervals['ISI'] for interval in neuron])
+    mean = flat_intervals.mean()*1000
+    for key, color in zip(keys_ordered,colors):
+        flat_intervals = np.array([interval for neuron in intervals[key] for interval in neuron])
+        plt.hist(flat_intervals*1000, normed = True, bins = 50, color=color, alpha = .5, range = ((0,10*mean)), log = False)
+    plt.tight_layout()
+    
 def find_saddle(tau_n, Iapp, node, cycle_boundary):
     '''Finds saddle location given parameters'''
     #Find point with smallest derivative vector located between the node and the limit cycle
