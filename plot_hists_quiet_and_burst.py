@@ -17,8 +17,7 @@ for I_noise in I_noises:
             try:     
                 results = get_simulation(file_name)
                 plot_quiet_and_burst_hist(results)
-                if duration/ms >= 10000:
-                    plt.savefig('histograms_quiet_and_burst/'+file_name+'.png')
+                plt.savefig('histograms_quiet_and_burst/'+file_name+'.png')
                 plt.show()
             except IOError:
                 pass
