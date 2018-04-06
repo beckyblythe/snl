@@ -34,15 +34,19 @@ def plot_subplot(fig, file_name, name, idx_tau_n, idx_Iapp):
         print(file_name)
         intervals = results
         flat_intervals = np.array([interval for neuron in intervals['ISI'] for interval in neuron])
-        mean = 5 # flat_intervals.mean()*1000
+        mean = 30 # flat_intervals.mean()*1000
         ax.xlim = ((0,5*mean))
         for key in keys:
             flat_intervals = np.array([interval for neuron in intervals[key] for interval in neuron])
             ax.hist(flat_intervals*1000, normed = True, bins = 50,  alpha = .5, range = ((0,5*mean)), log = False, label = key)
+            ax.axvline(x = flat_intervals.mean()*1000)
         if name == 'quiet_and_burst':
             num_ISI = np.sum([len(neuron) for neuron in intervals['ISI']])
             num_ISI_burst = np.sum([len(neuron) for neuron in intervals['ISI_burst']])
             ax.set_title(str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst')
+        if name == 'all':
+            num_ISI = np.sum([len(neuron) for neuron in intervals['ISI']])
+            ax.set_title(str(num_ISI) + ' ISIs')
     except IOError:
         ax.axis('off')
         pass
@@ -74,4 +78,4 @@ def plot_all_histograms(name):
         plt.tight_layout()
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png', bbox_inches='tight')
         
-plot_all_histograms('quiet_and_burst')
+plot_all_histograms('all')
