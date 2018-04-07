@@ -1,7 +1,7 @@
 from brian2 import *
 from Neuron import *
 
-def plot_all_histograms(name):
+def plot_all_histograms(name, log=False):
     plt.rcParams['figure.figsize'] = 12, 12  
 
     tau_ns = [ .155, .1575,.16,.1625, .165]*ms
@@ -44,16 +44,15 @@ def plot_all_histograms(name):
                     ax.xlim = ((0,5*mean))
                     for key in keys:
                         flat_intervals = np.array([interval for neuron in intervals[key] for interval in neuron])
-                        ax.hist(flat_intervals*1000, normed = True, bins = 50,  alpha = .5, range = ((0,5*mean)), log = False, label = key)
+                        ax.hist(flat_intervals*1000, normed = True, bins = 50,  alpha = .5, range = ((0,5*mean)), log = log, label = key)
                         
                 except IOError:
                     ax.axis('off')
                     pass
                 
-        ax = fig.add_subplot(5,5,1)
-        plt.legend(loc = 2)
+        plt.legend()
         plt.tight_layout()
         
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png')
         
-plot_all_histograms('quiet_and_burst')
+plot_all_histograms('quiet_and_burst', log = False)
