@@ -1,5 +1,6 @@
 from brian2 import *
 from Neuron import *
+from stat_testing import *
 
 def parameters_by_name(name):
 
@@ -30,37 +31,55 @@ def parameters_by_name(name):
     if name == 'n_last_up':
         keys = [name]
         xlabel = 'n'
+    if name == 'up_and_down':
+        keys = ['time_up', 'time_down']
+        xlabel = 'n'
+    if name == 'time_above':
+        keys = [name]
+        xlabel = 't (ms)'
+    if name == 'up':
+        keys = ['time_up']
+        xlabel = 't (ms)'
+
     
     ylabel = 'Distribution'    
     return keys, xlabel, ylabel
 
-def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, cut):
+def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit):
     ax = fig.add_subplot(5,5,5*(4 - idx_tau_n)+idx_Iapp +1)
     ax.set_xlim((0,cut))
+#    ax.set_ylim((10**(-2.8),10**0))
     try:            
         results = get_simulation(file_name)
         print(file_name)
         flat_results = np.array([result for neuron in results['ISI'] for result in neuron])
         means = {}
         for key in keys:
-            flat_results = np.array([result for neuron in results[key] for result in neuron])
-            ax.hist(flat_results*1000, normed = True, bins = 50,  alpha = .5, range = ((0,cut)), log = False, label = key)
-            means[key] = int(flat_results.mean()*1000)
+            flat_results = np.array([result for neuron in results[key] for result in neuron])*1000
+            ax.hist(flat_results, normed = True, bins = 50,  alpha = .5, range = ((0,cut)), log = log, label = key)
+            
+            plot_fit(flat_results, cut, fit)
+                
+            means[key] = int(flat_results.mean())
+            means[key] = round(flat_results.mean(),2)
         means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
+        title = ''
         if name == 'quiet_and_burst':
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
             num_ISI_burst = np.sum([len(neuron) for neuron in results['ISI_burst']])
-            ax.set_title(str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst'+ means_title_part)
+            title = str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst'
         if name == 'all':
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
             
-            ax.set_title(str(num_ISI) + ' ISIs' + means_title_part)
+            title = str(num_ISI) + ' ISIs' 
+            
+        ax.set_title(title + means_title_part)
     except IOError:
         ax.axis('off')
         pass
     
 
-def plot_all_histograms(name, log = False, cut=20):
+def plot_all_histograms(name, log = False, cut=20, fit = None):
     plt.rcParams['figure.figsize'] = 13, 16  
     tau_ns = [ .155, .1575,.16,.1625, .165]*ms
     Iapps = [1.2,2.3,3.2,3.9,4.3]*uA
@@ -74,7 +93,7 @@ def plot_all_histograms(name, log = False, cut=20):
         for idx_tau_n, tau_n in enumerate(tau_ns):
             for idx_Iapp, Iapp in enumerate(Iapps):
                 file_name=str(duration/second)+' s  '+str(I_noise)+' '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
-                plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, cut)
+                plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
                 
         plt.legend(loc = 1)
         fig.text(0.5, -.02, xlabel, ha='center')
@@ -82,4 +101,4 @@ def plot_all_histograms(name, log = False, cut=20):
         plt.tight_layout()
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png')
         
-plot_all_histograms('all', log = False)
+plot_all_histograms('up', log = False, cut = 50, fit = 'exp')
