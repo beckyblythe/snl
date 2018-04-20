@@ -39,11 +39,11 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise, dt=.001*ms):
 
     return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
-def find_points(tau_n, Iapp, v0=[-75,-50]*mV,n0=[.05,.01], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-27.5,-50]*mV,n0=[.05,0,.01], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     dt=.00005*ms
-    Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 2, v0=v0, n0=n0, duration=20*ms, 
+    Spike_t, Spike_i, t, V, n = simulate_neuron(tau_n=tau_n, Iapp=Iapp, number = 3, v0=v0, n0=n0, duration=20*ms, 
                                       I_noise=0*uA, dt=dt)
     V*=1000
     node = [max(V[0]),n[0,np.argmax(V[0])]]
@@ -54,6 +54,7 @@ def find_points(tau_n, Iapp, v0=[-75,-50]*mV,n0=[.05,.01], plot = False):
     file_name = str(tau_n)+'  '+str(Iapp)
     if plot:
         plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
+        plt.plot(V[-2], n[-2], color = 'grey')
         plt.savefig('points/'+file_name+'.png') 
         plt.show()
 
@@ -362,23 +363,26 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 ############################################
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('parameters', metavar='N', type=float, nargs='+',
-                   help='tau_n, Iapp')
-args = parser.parse_args().parameters
-
-#parameters to play with
-
-print ('tau_n = ' + str(args[0]))
-print ('Iapp = ' + str(args[1]))
-
-tau_n = args[0] * ms
-Iapp = args[1] * uA #/cm**2
+#parser = argparse.ArgumentParser(description='Process some integers.')
+#parser.add_argument('parameters', metavar='N', type=float, nargs='+',
+#                   help='tau_n, Iapp')
+#args = parser.parse_args().parameters
+#
+##parameters to play with
+#
+#print ('tau_n = ' + str(args[0]))
+#print ('Iapp = ' + str(args[1]))
+#
+#tau_n = args[0] * ms
+#Iapp = args[1] * uA #/cm**2
+tau_n = .155 * ms
+Iapp = 3.8 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 50*ms
 
+find_points(tau_n, Iapp, plot = True)
 
-plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
+#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
