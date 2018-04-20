@@ -42,11 +42,13 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, cut):
         print(file_name)
         flat_results = np.array([result for neuron in results['ISI'] for result in neuron])
         means = {}
+        var = {}
         for key in keys:
             flat_results = np.array([result for neuron in results[key] for result in neuron])
             ax.hist(flat_results*1000, normed = True, bins = 50,  alpha = .5, range = ((0,cut)), log = False, label = key)
-            means[key] = int(flat_results.mean()*1000)
-        means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
+            means[key] = round(flat_results.mean()*1000,2)
+            var[key] = round(np.var(flat_results*1000),2)
+        means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms\n'+'var: ' + str(var[key]) + 'ms^2'for key in keys])
         if name == 'quiet_and_burst':
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
             num_ISI_burst = np.sum([len(neuron) for neuron in results['ISI_burst']])
@@ -55,6 +57,9 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, cut):
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
             
             ax.set_title(str(num_ISI) + ' ISIs' + means_title_part)
+            
+        if name == 'burst':
+            ax.set_title(means_title_part)
     except IOError:
         ax.axis('off')
         pass
@@ -82,4 +87,4 @@ def plot_all_histograms(name, log = False, cut=20):
         plt.tight_layout()
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png')
         
-plot_all_histograms('all', log = False)
+plot_all_histograms('burst', log = False)

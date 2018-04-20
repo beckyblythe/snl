@@ -361,26 +361,24 @@ n_inf = 1./(1+exp((-25-v/mV)/5.)) : 1
 m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 '''
 ############################################
-#defaultclock.dt = 0.001*ms
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('parameters', metavar='N', type=float, nargs='+',
+                   help='tau_n, Iapp')
+args = parser.parse_args().parameters
+
+#parameters to play with
+
+print ('tau_n = ' + str(args[0]))
+print ('Iapp = ' + str(args[1]))
+
+tau_n = args[0] * ms
+Iapp = args[1] * uA #/cm**2
+I_noise = 2.5*uA
+duration = 50*ms
 
 
-#parser = argparse.ArgumentParser(description='Process some integers.')
-#parser.add_argument('parameters', metavar='N', type=float, nargs='+',
-#                   help='tau_n, Iapp')
-#args = parser.parse_args().parameters
-#
-##parameters to play with
-#
-#print ('tau_n = ' + str(args[0]))
-#print ('Iapp = ' + str(args[1]))
-#
-#tau_n = args[0] * ms
-#Iapp = args[1] * uA #/cm**2
-#I_noise = 2.5*uA
-#duration = 50000*ms
-#
-#
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =40, plot=False)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)

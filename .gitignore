@@ -2,3 +2,4 @@
 .gitignore
 raw_simulations/
 python
+old_model/simulations/
