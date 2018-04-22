@@ -380,7 +380,7 @@ Iapp = 3.8 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 50*ms
 
-find_points(tau_n, Iapp, plot = True)
+#find_points(tau_n, Iapp, plot = True)
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 

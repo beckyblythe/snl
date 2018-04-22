@@ -56,40 +56,28 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
         means = {}
         var = {}
         for key in keys:
-<<<<<<< HEAD
-            flat_results = np.array([result for neuron in results[key] for result in neuron])
-            ax.hist(flat_results*1000, normed = True, bins = 50,  alpha = .5, range = ((0,cut)), log = False, label = key)
-            means[key] = round(flat_results.mean()*1000,2)
-            var[key] = round(np.var(flat_results*1000),2)
-        means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms\n'+'var: ' + str(var[key]) + 'ms^2'for key in keys])
-=======
+
             flat_results = np.array([result for neuron in results[key] for result in neuron])*1000
-            ax.hist(flat_results, normed = True, bins = 50,  alpha = .5, range = ((0,cut)), log = log, label = key)
-            
+            ax.hist(flat_results, normed = True, bins = 25,  alpha = .5, range = ((0,cut)), log = log, label = key)
             plot_fit(flat_results, cut, fit)
-                
             means[key] = int(flat_results.mean())
             means[key] = round(flat_results.mean(),2)
         means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
         title = ''
->>>>>>> 2aaf0206243d36e03c9603dc81dcafdc1f6422e6
+
         if name == 'quiet_and_burst':
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
             num_ISI_burst = np.sum([len(neuron) for neuron in results['ISI_burst']])
             title = str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst'
         if name == 'all':
             num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
-            
-<<<<<<< HEAD
+
             ax.set_title(str(num_ISI) + ' ISIs' + means_title_part)
             
         if name == 'burst':
             ax.set_title(means_title_part)
-=======
-            title = str(num_ISI) + ' ISIs' 
-            
-        ax.set_title(title + means_title_part)
->>>>>>> 2aaf0206243d36e03c9603dc81dcafdc1f6422e6
+        ax.set_ylim((0,1))
+        ax.set_title(title+means_title_part)
     except IOError:
         ax.axis('off')
         pass
@@ -117,8 +105,5 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
         plt.tight_layout()
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png')
         
-<<<<<<< HEAD
-plot_all_histograms('burst', log = False)
-=======
-plot_all_histograms('up', log = False, cut = 50, fit = 'exp')
->>>>>>> 2aaf0206243d36e03c9603dc81dcafdc1f6422e6
+plot_all_histograms('burst', log = False, cut = 10, fit = 'inv')
+
