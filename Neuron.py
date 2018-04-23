@@ -54,7 +54,8 @@ def find_points(tau_n, Iapp, v0=[-75,-27.5,-50]*mV,n0=[.05,0,.01], plot = False)
     file_name = str(tau_n)+'  '+str(Iapp)
     if plot:
         plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
-        plt.plot(V[-2], n[-2], color = 'grey')
+        plot_field(tau_n, Iapp, plot=True)
+#        plt.plot(V[-2], n[-2], color = 'grey')
         plt.savefig('points/'+file_name+'.png') 
         plt.show()
 
@@ -133,7 +134,7 @@ def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
     plt.ylim((-.05,.7))
     
@@ -332,6 +333,7 @@ def plot_field(tau_n, Iapp, plot = False):
     dn_grid = (1./(1+exp((-25-v_grid)/5.))-n_grid)/tau_n*ms/.75
     #Normalization to have all vectors of the same length (otherwise the small ones are too small)
     norm = np.sqrt(np.square(dv_grid)+np.square(dn_grid))
+    
 #    print(dv_grid)
     dv_grid += 2*dv_grid/norm
     dn_grid += 2*dn_grid/norm
@@ -376,11 +378,11 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #tau_n = args[0] * ms
 #Iapp = args[1] * uA #/cm**2
 tau_n = .155 * ms
-Iapp = 3.8 * uA #/cm**2
+Iapp = 4.5 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 50*ms
 
-#find_points(tau_n, Iapp, plot = True)
+find_points(tau_n, Iapp, plot = True)
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 
