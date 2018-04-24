@@ -57,9 +57,9 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
         var = {}
         for key in keys:
 
-            flat_results = np.array([result for neuron in results[key] for result in neuron])#*1000
-            ax.hist(flat_results, normed = True, bins = 40,  alpha = .5, range = ((0.0005,cut)), log = log, label = key)
-            ax.set_xlim((0.0005,cut))
+            flat_results = np.array([result for neuron in results[key] for result in neuron])*1000
+            ax.hist(flat_results, normed = True, bins = 40,  alpha = .5, range = ((0,cut)), log = log, label = key)
+            ax.set_xlim((0,cut))
 #            plot_fit(flat_results, cut, fit)
             means[key] = int(flat_results.mean())
             means[key] = round(flat_results.mean(),2)
@@ -77,7 +77,7 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
             
         if name == 'burst':
             ax.set_title(means_title_part)
-        ax.set_ylim((0,4000))
+        ax.set_ylim((0,1))
         ax.set_title(title+means_title_part)
     except IOError:
         ax.axis('off')
@@ -110,5 +110,5 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
         
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png', bbox_inches = 'tight')
         
-plot_all_histograms('n_last_up', log = False, cut = .002)
+plot_all_histograms('all', log = False, cut = 20)
 
