@@ -131,7 +131,7 @@ def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
     plt.figure(figsize=(3., 3.))
     plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
     plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
-#    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
 #    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
@@ -377,12 +377,12 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #
 #tau_n = args[0] * ms
 #Iapp = args[1] * uA #/cm**2
-tau_n = .160 * ms
+tau_n = .15 * ms
 Iapp =0 * uA #/cm**2
 I_noise = 2.5*uA
 duration = 50*ms
 
-find_points(tau_n, Iapp, plot = True)
+#find_points(tau_n, Iapp, plot = True)
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 

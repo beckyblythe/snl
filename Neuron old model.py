@@ -248,7 +248,7 @@ gK = 9*msiemens
 tau=1*ms
 
 Cm = 1.65*uF # /cm**2
-Iapp = 0.160*uA
+Iapp = 0.155*uA
 I_noise = .100*uA
 duration = 5000000*ms
 

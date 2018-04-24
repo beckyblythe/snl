@@ -36,10 +36,10 @@ def parameters_by_name(name):
         xlabel = 'n'
     if name == 'time_above':
         keys = [name]
-        xlabel = 't (ms)'
+        xlabel = 'time (ms)'
     if name == 'up':
         keys = ['time_up']
-        xlabel = 't (ms)'
+        xlabel = 'time (ms)'
 
     
     ylabel = 'Distribution'    
@@ -47,7 +47,7 @@ def parameters_by_name(name):
 
 def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit):
     ax = fig.add_subplot(5,5,5*(4 - idx_tau_n)+idx_Iapp +1)
-    ax.set_xlim((0,cut))
+    
 #    ax.set_ylim((10**(-2.8),10**0))
     try:            
         results = get_simulation(file_name)
@@ -58,7 +58,9 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
         for key in keys:
 
             flat_results = np.array([result for neuron in results[key] for result in neuron])*1000
-            ax.hist(flat_results, normed = True, bins = 25,  alpha = .5, range = ((0,cut)), log = log, label = key)
+            cut = flat_results.mean()*5
+            ax.hist(flat_results, normed = True, bins = int(cut),  alpha = .5, range = ((0,cut)), log = log, label = key)
+            ax.set_xlim((0,cut))
             plot_fit(flat_results, cut, fit)
             means[key] = int(flat_results.mean())
             means[key] = round(flat_results.mean(),2)
@@ -76,7 +78,7 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
             
         if name == 'burst':
             ax.set_title(means_title_part)
-        ax.set_ylim((0,1))
+#        ax.set_ylim((0,.2))
         ax.set_title(title+means_title_part)
     except IOError:
         ax.axis('off')
@@ -91,6 +93,8 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
     duration = 50*second
     number = 10    
     keys, xlabel, ylabel = parameters_by_name(name)   
+    if log:
+        ylabel = 'log-' + ylabel
     
     for I_noise in I_noises:
         fig = plt.figure()
@@ -100,10 +104,12 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
                 plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
                 
         plt.legend(loc = 1)
-        fig.text(0.5, -.02, xlabel, ha='center')
-        fig.text(-.02, 0.5, ylabel, va='center', rotation='vertical')
         plt.tight_layout()
-        plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png')
+        fig.text(.5, -.005, xlabel, ha='center', fontsize=12)
+        fig.text(-.005, 0.5, ylabel, va='center', rotation='vertical', fontsize=12)
+#        
         
-plot_all_histograms('burst', log = False, cut = 10, fit = 'inv')
+        plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png', bbox_inches = 'tight')
+        
+plot_all_histograms('up', fit = 'exp', log = False, cut = 10)
 
