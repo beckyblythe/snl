@@ -63,7 +63,7 @@ def plot_subplot(fig, file_name, name, keys, idx_tau_n, idx_Iapp, log, cut, fit)
 #            plot_fit(flat_results, cut, fit)
             means[key] = int(flat_results.mean())
             means[key] = round(flat_results.mean(),2)
-        means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) for key in keys])
+        means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
         title = ''
 
         if name == 'quiet_and_burst':
