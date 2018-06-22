@@ -110,5 +110,59 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
         
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png', bbox_inches = 'tight')
         
-plot_all_histograms('all', log = False, cut = 20)
+def plot_separately(name, log = False, cut=20, fit = None):
+    plt.rcParams['figure.figsize'] = 10, 10 
+    tau_ns = [ .155, .1575,.16,.1625, .165]*ms
+    Iapps = [1.2,2.3,3.2,3.9,4.3]*uA
+    I_noises = [3]*uA
+    duration = 50*second
+    number = 10    
+    keys, xlabel, ylabel = parameters_by_name(name)  
+    for I_noise in I_noises:
+        
+        for idx_tau_n, tau_n in enumerate(tau_ns):
+            for idx_Iapp, Iapp in enumerate(Iapps):
+                file_name=str(duration/second)+' s  '+str(I_noise)+' '+str(tau_n)+'  '+str(Iapp)+' '+str(number)
+                try:            
+                    results = get_simulation(file_name)
+                    print(file_name)
+                    plt.figure()
+                    flat_results = np.array([result for neuron in results['ISI'] for result in neuron])
+                    means = {}
+                    var = {}
+                    for key in keys:
+            
+                        flat_results = np.array([result for neuron in results[key] for result in neuron])*1000
+                        plt.hist(flat_results, normed = True, bins = 40,  alpha = .5, range = ((0,cut)), log = log, label = key)
+                        plt.xlim((0,cut))
+            #            plot_fit(flat_results, cut, fit)
+                        means[key] = int(flat_results.mean())
+#                        means[key] = round(flat_results.mean(),2)
+                    means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
+                    title = ''
+            
+                    if name == 'quiet_and_burst':
+                        num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
+                        num_ISI_burst = np.sum([len(neuron) for neuron in results['ISI_burst']])
+                        title = str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst'
+                    if name == 'all':
+                        num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
+                        plt.axvline(means[key])
+#                        plt.title(str(num_ISI) + ' ISIs' + means_title_part)
+                        
+                    if name == 'burst':
+                        ax.set_title(means_title_part)
+                    plt.ylim((0,1))
+                    plt.title(title+means_title_part)
+                    
+                    plt.savefig('pictures_presentation/'+file_name+'.png', bbox_inches = 'tight')
+                    plt.close()
+                except IOError:
+                    
+                    pass
+        
+       
+        
+    
+plot_separately('all', log = False, cut = 20)
 

@@ -21,6 +21,7 @@ ax.set_yticks([4.3,3.9,3.2,2.3,1.2])
 ax.view_init(10,-75)
 plt.gca().invert_xaxis()
 
+file = open('ratio.txt', 'w+')
 for I_noise, color in zip(I_noises,['b','r','g']):
     for tau_n in tau_ns:
         for Iapp in Iapps:
@@ -34,19 +35,11 @@ for I_noise, color in zip(I_noises,['b','r','g']):
                 ISI_quiet = [ISI for neuron in data['ISI_burst'] for ISI in neuron ]
                 ratio = len(ISI_quiet)/len(ISIs)
                 print(tau_n/ms,Iapp/uA, ratio)    
-                ax.scatter(tau_n/ms,Iapp/uA, ratio, color = color)
-#                ax.plot(Iapp/uA, ratio, 'r+', zdir='x', zs = 1.5)
-
-                
-                try:     
-                    data = get_simulation(file_name)
-                    ISIs = [ISI for neuron in data['ISI'] for ISI in neuron ]
-                    ISI_quiet = [ISI for neuron in data['ISI_quiet'] for ISI in neuron ]
-                    ratio = len(ISI_quiet)/len(ISIs)
-                    print(tau_n/ms,Iapp/uA, ratio)    
-                    ax.scatter(tau_n/ms,Iapp/uA, ratio)
+                file.write(str(tau_n/ms)+','+str(Iapp/uA) +','+str(round(ratio,2))+';')
+                    
                     
                 
-                except IOError:
-                    print('1')
-                    pass
+            except IOError:
+                print('1')
+                pass
+file.close()
