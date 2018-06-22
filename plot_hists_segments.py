@@ -111,7 +111,7 @@ def plot_all_histograms(name, log = False, cut=20, fit = None):
         plt.savefig('pictures_report/'+name+' '+str(I_noise)+'.png', bbox_inches = 'tight')
         
 def plot_separately(name, log = False, cut=20, fit = None):
-    plt.rcParams['figure.figsize'] = 10, 10 
+    plt.rcParams['figure.figsize'] = 9.1,9.1
     tau_ns = [ .155, .1575,.16,.1625, .165]*ms
     Iapps = [1.2,2.3,3.2,3.9,4.3]*uA
     I_noises = [3]*uA
@@ -153,8 +153,11 @@ def plot_separately(name, log = False, cut=20, fit = None):
                     if name == 'burst':
                         ax.set_title(means_title_part)
                     plt.ylim((0,1))
-                    plt.title(title+means_title_part)
-                    
+                    plt.title(title+means_title_part, fontsize = 16)
+                    plt.xticks(fontsize=16)
+                    plt.yticks(fontsize=16)
+                    plt.xlabel('ISI (ms)', fontsize = 18)
+                    plt.ylabel('Distribution', fontsize = 18)                    
                     plt.savefig('pictures_presentation/'+file_name+'.png', bbox_inches = 'tight')
                     plt.close()
                 except IOError:
