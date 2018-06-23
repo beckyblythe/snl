@@ -12,7 +12,7 @@ class Object(object):
 
 
 plt.rcParams['figure.figsize'] = 9, 6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-#plt.rcParams['agg.path.chunksize'] = 10000
+#plt.rcParams['figure.fontsize'] = 16
 #plt.rcParams['image.cmap'] = 'gray'
 
 
@@ -39,7 +39,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise, dt=.001*ms):
 
     return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
-def find_points(tau_n, Iapp, v0=[-75,-29.5,-50]*mV,n0=[.0,0,.0], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-31.2,-50]*mV,n0=[.0,0,.005], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     dt=.00005*ms
@@ -55,7 +55,9 @@ def find_points(tau_n, Iapp, v0=[-75,-29.5,-50]*mV,n0=[.0,0,.0], plot = False):
     if plot:
         plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
         plot_field(tau_n, Iapp, plot=True)
-#        plt.plot(V[-2], n[-2], color = 'grey')
+        cut = np.where(V[-2]>=saddle[0])
+        print(V[-2][cut])
+        plt.plot(V[-2][cut], n[-2][cut], color = 'grey', linewidth = 5)
         plt.savefig('points/'+file_name+'.png') 
         plt.show()
 
@@ -94,8 +96,8 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
         print('Other plots are already generated. Find them in traces folder.')
     
     except IOError:
-        v0=(np.ones(number)*node[0]+np.random.randn(number))*mV
-        n0=np.ones(number)*node[1]+np.random.randn(number)*.01
+        v0=(np.ones(number)*saddle[0]+np.random.randn(number))*mV
+        n0=np.ones(number)*saddle[1]+np.random.randn(number)*.01
         Spike_t, Spike_i, t, V, n= simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise)
         V*=1000
        
@@ -118,6 +120,7 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
             
         if plot and duration <= 100*ms:
             plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary)
+            plt.savefig('traces/'+file_name+'.png')
                     
     if plot:
         plot_histograms(results) 
@@ -128,30 +131,40 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
    
   
 def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
-    plt.figure(figsize=(3., 3.))
-    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
-    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
+    plt.figure(figsize=(7, 7))
+    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 5)
+    plt.plot(node[0], node[1],marker='o', color='0', ms = 15)
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=15)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
 #    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 1)
     plt.xlim((-70,0))
+    plt.xticks(fontsize=16)
     plt.ylim((-.05,.7))
+    plt.yticks(fontsize=16)
+    plt.title(' ', fontsize = 16)
+    plt.xlabel('V (mV)', fontsize = 18)
+    plt.ylabel('n', fontsize = 18)
+    plt.tight_layout()
     
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
 
     plt.subplot2grid((2,2),(0,0), colspan=2)
-    plt.title('Voltage trace')
-    plt.xlabel('time (s)')
-    plt.ylabel('voltage (mV)')
-    plt.plot(t, V.T) 
+    plt.title('Voltage trace', fontsize = 16)
+    plt.xlabel('time (ms)', fontsize = 16)
+    plt.ylabel('voltage (mV)', fontsize = 16)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
+    plt.plot(t*1000, V.T) 
     plt.axhline(y = node[0],color='0', linestyle ='--')
     plt.axhline(y = saddle[0],color='.5', linestyle ='--')
     plt.subplot2grid((2,2),(1,0))
-    plt.title('Trajectory in V-n plane')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
+    plt.title('Trajectory in V-n plane', fontsize = 16)
+    plt.xlabel('voltage (mV)', fontsize = 16)
+    plt.ylabel('n', fontsize = 16)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
     plt.plot(V.T,n.T)
     plt.plot(node[0], node[1],marker='o', color='0')
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
@@ -163,9 +176,11 @@ def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     plt.ylim((-.05,.7))
 #    plot_field(tau_n, Iapp, plot = True)
     plt.subplot2grid((2,2),(1,1))
-    plt.title('Trajectory in V-n plane (zoomed)')
-    plt.xlabel('voltage (mV)')
-    plt.ylabel('n')
+    plt.title('Trajectory in V-n plane (zoomed)', fontsize = 16)
+    plt.xlabel('voltage (mV)', fontsize = 16)
+    plt.ylabel('n', fontsize = 16)
+    plt.xticks(fontsize = 16)
+    plt.yticks(fontsize = 16)
     plt.plot(V.T,n.T)
     plt.plot(node[0], node[1],marker='o', color='0')
     plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5')
@@ -377,14 +392,14 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #
 #tau_n = args[0] * ms
 #Iapp = args[1] * uA #/cm**2
-tau_n = .15 * ms
-Iapp =0 * uA #/cm**2
-I_noise = 2.5*uA
-duration = 50*ms
+tau_n = .160 * ms
+Iapp =3.2 * uA #/cm**2
+I_noise = 3*uA
+duration = 40*ms
 
 #find_points(tau_n, Iapp, plot = True)
 
-#plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
+plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 
 
 #Spikes, t, V, n = simulate_neuron(tau_n, Iapp, 1, -30*mV, 0, duration, I_noise)
