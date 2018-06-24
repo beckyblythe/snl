@@ -136,7 +136,7 @@ def plot_separately(name, log = False, cut=20, fit = None):
                         plt.hist(flat_results, normed = True, bins = 40,  alpha = .5, range = ((0,cut)), log = log, label = key)
                         plt.xlim((0,cut))
             #            plot_fit(flat_results, cut, fit)
-                        means[key] = int(flat_results.mean())
+                        means[key] = round(flat_results.mean(), 2)
 #                        means[key] = round(flat_results.mean(),2)
                     means_title_part = ''.join(['\n' + key + ' mean: ' + str(means[key]) + 'ms' for key in keys])
                     title = ''
