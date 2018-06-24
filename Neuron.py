@@ -57,7 +57,7 @@ def find_points(tau_n, Iapp, v0=[-75,-32.3,-50]*mV,n0=[.0,0,.005], plot = False)
         plot_field(tau_n, Iapp, plot=True)
         cut = np.where(V[-2]>=saddle[0])
 #        print(V[-2][cut])
-        plt.plot(V[-2][cut], n[-2][cut], color = 'grey', linewidth = 5)
+#        plt.plot(V[-2][cut], n[-2][cut], color = 'grey', linewidth = 5)
         plt.savefig('points/'+file_name+'.png', bbox_inches = 'tight') 
         plt.show()
 
@@ -131,21 +131,21 @@ def plot_everything(tau_n, Iapp, duration, I_noise, number =1, plot = False):
    
   
 def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
-    plt.figure(figsize=(8, 8))
-    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 5)
-    plt.plot(node[0], node[1],marker='o', color='0', ms = 15)
-    y = np.linspace(-.1,.7,50)
-    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
-    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 5)
+    plt.figure(figsize=(3, 3))
+    plt.plot(V.T,n.T, color = '#4B0082', linewidth = 3)
+    plt.plot(node[0], node[1],marker='o', color='0', ms = 10)
+#    y = np.linspace(-.1,.7,50)
+#    x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
+#    plt.plot(x,y, color = '0', linestyle = '--',linewidth = 5)
     plt.xlim((-70,0))
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=15)
-    plt.xticks(fontsize=16)
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=10)
+    plt.xticks()
     plt.ylim((-.05,.7))
-    plt.yticks(fontsize=16)
-    plt.title(' ', fontsize = 16)
-    plt.xlabel('V (mV)', fontsize = 18)
-    plt.ylabel('n', fontsize = 18)
-    plt.tight_layout()
+    plt.yticks()
+#    plt.title(' ', fontsize = 16)
+#    plt.xlabel('V (mV)')
+#    plt.ylabel('n')
+#    plt.tight_layout()
     
 def plot_traces(t,V,n,node, saddle, sep_slope, cycle_boundary):
     '''plots voltage against time'''   
