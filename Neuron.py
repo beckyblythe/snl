@@ -39,7 +39,7 @@ def simulate_neuron(tau_n, Iapp, number, v0, n0, duration, I_noise, dt=.001*ms):
 
     return M.t_, M.i_, Mv.t_, Mv.v_, Mn.n_    
     
-def find_points(tau_n, Iapp, v0=[-75,-31.2,-50]*mV,n0=[.0,0,.01], plot = False):
+def find_points(tau_n, Iapp, v0=[-75,-32.3,-50]*mV,n0=[.0,0,.005], plot = False):
     '''finds the node and lowest point of limimt cycle in terms of voltage values
         trying to define threshold automatically '''
     dt=.00005*ms
@@ -55,9 +55,9 @@ def find_points(tau_n, Iapp, v0=[-75,-31.2,-50]*mV,n0=[.0,0,.01], plot = False):
     if plot:
         plot_bifurcation(t,V[-1],n[-1], node, saddle, sep_slope, cycle_boundary)
         plot_field(tau_n, Iapp, plot=True)
-#        cut = np.where(V[-2]>=saddle[0])
+        cut = np.where(V[-2]>=saddle[0])
 #        print(V[-2][cut])
-#        plt.plot(V[-2][cut], n[-2][cut], color = 'grey', linewidth = 5)
+        plt.plot(V[-2][cut], n[-2][cut], color = 'grey', linewidth = 5)
         plt.savefig('points/'+file_name+'.png', bbox_inches = 'tight') 
         plt.show()
 
@@ -134,11 +134,11 @@ def plot_bifurcation(t,V,n,node,saddle, sep_slope, cycle_boundary):
     plt.figure(figsize=(8, 8))
     plt.plot(V.T,n.T, color = '#4B0082', linewidth = 5)
     plt.plot(node[0], node[1],marker='o', color='0', ms = 15)
-    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=15)
     y = np.linspace(-.1,.7,50)
     x = sep_slope[0]/sep_slope[1]*(y-saddle[1])+saddle[0]
     plt.plot(x,y, color = '0', linestyle = '--',linewidth = 5)
     plt.xlim((-70,0))
+    plt.plot(saddle[0], saddle[1], marker = 'o', color = '.5', ms=15)
     plt.xticks(fontsize=16)
     plt.ylim((-.05,.7))
     plt.yticks(fontsize=16)
@@ -393,11 +393,11 @@ m_inf = 1./(1+exp((-20-v/mV)/15.)) : 1
 #tau_n = args[0] * ms
 #Iapp = args[1] * uA #/cm**2
 tau_n = .155 * ms
-Iapp =4.3 * uA #/cm**2
+Iapp =3 * uA #/cm**2
 I_noise = 3*uA
 duration = 40*ms
 
-#find_points(tau_n, Iapp, plot = True)
+find_points(tau_n, Iapp, plot = True)
 
 #plot_everything(tau_n=tau_n, Iapp=Iapp, duration=duration, I_noise=I_noise, number =5, plot=True)
 
