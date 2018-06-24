@@ -145,6 +145,7 @@ def plot_separately(name, log = False, cut=20, fit = None):
                         num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
                         num_ISI_burst = np.sum([len(neuron) for neuron in results['ISI_burst']])
                         title = str(int(num_ISI_burst/num_ISI*100))+'% ISI_burst'
+                        plt.legend(fontsize = 16)
                     if name == 'all':
                         num_ISI = np.sum([len(neuron) for neuron in results['ISI']])
                         plt.axvline(means[key])
@@ -155,11 +156,11 @@ def plot_separately(name, log = False, cut=20, fit = None):
                     if name == 'burst':
                         ax.set_title(means_title_part)
                     
-                    plt.title(title+means_title_part, fontsize = 16)
+                    plt.title('\n'+title, fontsize = 16)
                     plt.xticks(fontsize=16)
                     plt.yticks(fontsize=16)
                     plt.xlabel('ISI (ms)', fontsize = 18)
-                    plt.ylabel('log-Distribution', fontsize = 18)                    
+                    plt.ylabel('Distribution', fontsize = 18)                    
                     plt.savefig('pictures_presentation/'+file_name+'.png', bbox_inches = 'tight')
                     plt.close()
                 except IOError:
@@ -169,5 +170,5 @@ def plot_separately(name, log = False, cut=20, fit = None):
        
         
     
-plot_separately('all', log = True, cut = 20)
+plot_separately('quiet_and_burst', log = False , cut = 20)
 
